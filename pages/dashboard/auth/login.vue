@@ -1,13 +1,13 @@
 <script setup lang="ts">
 import { useAuthStore } from '~/stores/auth'
-import { resetAlert } from "~/helpers/Alert";
-import { useField, useForm } from 'vee-validate';
-import * as yup from 'yup';
-import { navigateTo } from "nuxt/app";
+import { useField, useForm } from 'vee-validate'
+import * as yup from 'yup'
+import { navigateTo } from "nuxt/app"
+import Cookies from "js-cookie";
 
 definePageMeta({
   title: 'Login Page',
-  layouts: 'auth',
+  layout: 'auth',
 })
 
 const authStore = useAuthStore();
@@ -34,12 +34,14 @@ let alertMessage = useCookie('alert-message')
 let alertPage = useCookie('alert-page')
 
 onBeforeRouteLeave((to, from, next) => {
-  resetAlert();
+  Cookies.remove('alert-message');
+  Cookies.remove('alert-page');
   next();
 });
 
 onBeforeRouteUpdate((to, from, next) => {
-  resetAlert();
+  Cookies.remove('alert-message');
+  Cookies.remove('alert-page');
   next();
 });
 </script>
@@ -49,7 +51,7 @@ onBeforeRouteUpdate((to, from, next) => {
     <div class="col-12">
       <div class="topbar-login d-flex align-items-center justify-content-start">
         <div class="container">
-          <img src="~/assets/image/brand/brand-logo.svg" alt="Brand Logo" height="52">
+          <img src="../../../assets/image/brand/brand-logo.svg" alt="Brand Logo" height="52">
         </div>
       </div>
     </div>
