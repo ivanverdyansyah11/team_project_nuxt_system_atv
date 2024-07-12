@@ -1,14 +1,13 @@
 <script setup lang="ts">
 import { useAuthStore } from '~/stores/auth'
-import { setAlert, resetAlert } from "~/helpers/Alert";
-import { useField, useForm } from 'vee-validate';
-import * as yup from 'yup';
-import { navigateTo } from "nuxt/app";
+import { useField, useForm } from 'vee-validate'
+import * as yup from 'yup'
+import { navigateTo } from "nuxt/app"
 import Cookies from "js-cookie";
 
 definePageMeta({
   title: 'Login Page',
-  layouts: 'auth',
+  layout: 'auth',
 })
 
 const authStore = useAuthStore();
@@ -31,18 +30,20 @@ const { value: password, errorMessage: passwordError } = useField('password');
 const registered = handleSubmit( async (values) => {
   await authStore.register(values);
   if (authStore.status_code === 200) {
-    setAlert('Successfully register account', 'Register')
+    Cookies.set('alert-message', 'Successfully register account');
+    Cookies.set('alert-page', 'Register');
     navigateTo('/dashboard/auth/login')
   }
 });
 </script>
+
 
 <template>
   <div class="row justify-content-center login">
     <div class="col-12">
       <div class="topbar-login d-flex align-items-center justify-content-start">
         <div class="container">
-          <img src="~/assets/image/brand/brand-logo.svg" alt="Brand Logo" height="52">
+          <img src="../../../assets/image/brand/brand-logo.svg" alt="Brand Logo" height="52">
         </div>
       </div>
     </div>
