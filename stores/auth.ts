@@ -20,8 +20,8 @@ export const useAuthStore = defineStore('auth', {
                     method: 'POST',
                     body: credentials
                 });
-                this.token = response?.data.jwt;
-                this.user = response?.data.user;
+                this.token = response?.data.token;
+                this.user = response?.data;
                 Cookies.set('auth-token', this.token);
                 Cookies.set('auth-user', JSON.stringify(this.user));
                 this.status_code = response?.data ? 200 : null;
@@ -30,7 +30,7 @@ export const useAuthStore = defineStore('auth', {
             }
         },
         async logout() {
-            this.token = null;
+            this.token = '';
             this.user = null;
             Cookies.remove('auth-token');
             Cookies.remove('auth-user');
