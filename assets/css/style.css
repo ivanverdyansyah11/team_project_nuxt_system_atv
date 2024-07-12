@@ -97,6 +97,12 @@ form.form .input-group label {
     margin-bottom: 6px;
 }
 
+form.form .input-group .text-invalid {
+    font-size: 0.813rem;
+    color: rgba(var(--red-color), 1);
+    margin-top: 4px;
+}
+
 form.form .input {
     color: rgba(var(--dark-color), 0.62);
     padding: 12px 16px;
@@ -116,6 +122,20 @@ form.form .input:not(:placeholder-shown) {
 form.form .input::placeholder {
     color: rgba(var(--dark-color), 0.62);
     font-size: 0.875rem;
+}
+
+form.form .input-image {
+    width: 120px;
+    border-radius: 9999px;
+    aspect-ratio: 1/1;
+    object-fit: cover;
+}
+
+.input-hide {
+    position: absolute;
+    top: -2000px;
+    left: -2000px;
+    opacity: 0;
 }
 
 .invalid-label {
@@ -210,6 +230,19 @@ form.form .input-group .input-hide {
     aspect-ratio: 1/1;
     object-fit: cover;
 }
+
+.page-item.active .page-link {
+    background-color: rgba(var(--primary-color), 1);
+    border-color: rgba(var(--primary-color), 1);
+}
+
+.page-item:hover:not(.active) .page-link {
+    color: rgba(var(--primary-color), 1);
+}
+
+.page-link {
+    color: rgba(var(--primary-color), 1);
+}
 /* END BASE TEMPLATE */
 
 
@@ -268,13 +301,14 @@ form.form .input-group .input-hide {
 .topbar-hamburger {
     width: 52px;
     height: 52px;
-    background-color: rgba(var(--dark-color));
+    background-color: transparent;
     border-radius: 9999px;
     border: var(--border-style);
 }
 
 .topbar-hamburger i {
     font-size: 1.125rem;
+    color: rgba(var(--primary-color), 1);
 }
 
 .topbar-hamburger:hover,
@@ -302,7 +336,7 @@ form.form .input-group .input-hide {
 }
 
 .sidebar .brand-logo {
-    width: 120px;
+    width: 92px;
     margin-bottom: 24px;
 }
 
@@ -577,8 +611,8 @@ html {
 }
 
 .modal .modal-header button {
-    width: 32px;
-    height: 32px;
+    width: 36px;
+    height: 36px;
     display: flex;
     align-items: center;
     justify-content: center;
