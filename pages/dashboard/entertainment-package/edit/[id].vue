@@ -42,13 +42,14 @@ const servicesError = ref('');
 
 const loadBundle = async() => {
   await bundleStore.getBundleById(route.params.id);
+  updateDataImage.value = bundleStore?.bundle?.image_path != null ? `http://localhost:8000/${bundleStore.bundle.image_path}` : 'https://placehold.co/600x400?text=Image+Not+Found';
   setValues({
     name: bundleStore.bundle.name,
     description: bundleStore.bundle.description,
     price: bundleStore.bundle.price,
     expired_at: bundleStore.bundle.expired_at,
+    image: updateDataImage.value,
   })
-  updateDataImage.value = bundleStore?.bundle?.image_path != null ? `http://localhost:8000/${bundleStore.bundle.image_path}` : 'https://placehold.co/600x400?text=Image+Not+Found';
   services.value = bundleStore.bundle?.services.map(s => s.entertainment_service.id);
 }
 
