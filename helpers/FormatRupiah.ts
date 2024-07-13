@@ -1,13 +1,13 @@
-export function formatRupiah(angka: number): string {
-    const numberString = angka.toString();
+export function formatRupiah(amount: number): string {
+    const numberString = amount.toString();
     const split = numberString.split(',');
-    const sisa = split[0].length % 3;
-    let rupiah = split[0].substr(0, sisa);
-    const ribuan = split[0].substr(sisa).match(/\d{3}/gi);
+    const remainder = split[0].length % 3;
+    let rupiah = split[0].substr(0, remainder);
+    const thousands = split[0].substr(remainder).match(/\d{3}/g);
 
-    if (ribuan) {
-        const separator = sisa ? '.' : '';
-        rupiah += separator + ribuan.join('.');
+    if (thousands) {
+        const separator = remainder ? '.' : '';
+        rupiah += separator + thousands.join('.');
     }
 
     return `Rp. ${rupiah}${split[1] ? ',' + split[1] : ',00'}`;
