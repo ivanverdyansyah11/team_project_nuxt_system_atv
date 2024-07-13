@@ -43,7 +43,7 @@ const registered = handleSubmit( async (values) => {
     <div class="col-12">
       <div class="topbar-login d-flex align-items-center justify-content-start">
         <div class="container">
-          <img src="../../../assets/image/brand/brand-logo.svg" alt="Brand Logo" height="52">
+          <img src="../../../assets/image/brand/brand-logo.svg" alt="Brand Logo" style="height: 72px !important;">
         </div>
       </div>
     </div>
