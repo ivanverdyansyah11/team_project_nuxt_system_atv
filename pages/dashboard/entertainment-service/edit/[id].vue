@@ -57,12 +57,13 @@ const mandatoryLuggagesError = ref('');
 
 const loadService = async() => {
   await serviceStore.getServiceById(route.params.id);
+  updateDataImage.value = serviceStore?.service?.image_path != null ? `http://localhost:8000/${serviceStore.service.image_path}` : 'https://placehold.co/600x400?text=Image+Not+Found';
   setValues({
     name: serviceStore.service.name,
     price: serviceStore.service.price,
     entertainment_category_id: serviceStore.service.entertainment_category.id,
+    image: updateDataImage.value,
   })
-  updateDataImage.value = serviceStore?.service?.image_path != null ? `http://localhost:8000/${serviceStore.service.image_path}` : 'https://placehold.co/600x400?text=Image+Not+Found';
   routes.value = serviceStore.service?.routes.map(r => r.route.id);
   facilities.value = serviceStore.service?.facilities?.map(f => f.facility.id);
   instructors.value = serviceStore.service?.instructors?.map(i => i.instructor.id);
