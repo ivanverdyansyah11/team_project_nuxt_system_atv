@@ -2,10 +2,14 @@
 import { useAuthStore } from '~/stores/auth'
 import { useRoute } from 'vue-router'
 import { ref, watch } from 'vue'
+import profileNotFound from '~/assets/image/profile/profile-not-found.svg' // Import the local image
 
 const route = useRoute();
 const title = ref('')
 const authStore = useAuthStore();
+const profileImage = authStore?.user?.user?.profile_path != null
+    ? `http://localhost:8000/${authStore?.user?.user?.profile_path}`
+    : profileNotFound; // Use the imported image path
 
 watch(
     () => route.meta.title,
@@ -28,7 +32,7 @@ watch(
             <h6>{{ authStore?.user.name }}</h6>
             <p class="text-capitalize">{{ authStore?.user.user.role }}</p>
           </div>
-          <img src="~/assets/image/profile/profile-not-found.svg"
+          <img :src="profileImage"
                class="img-fluid profile-image" alt="Profile Profile" draggable="false">
         </div>
       </NuxtLink>
