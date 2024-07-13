@@ -131,6 +131,10 @@ form.form .input-image {
     object-fit: cover;
 }
 
+form.form .input-image-full {
+    width: 100%;
+}
+
 .input-hide {
     position: absolute;
     top: -2000px;
