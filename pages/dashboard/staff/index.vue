@@ -1,7 +1,9 @@
 <script setup lang="ts">
 import { useStaffStore } from "~/stores/staff";
-import Cookies from 'js-cookie'
 import { ref, onMounted } from 'vue'
+import { useField, useForm } from 'vee-validate'
+import Cookies from 'js-cookie'
+import * as yup from 'yup'
 
 definePageMeta({
   title: 'Staff Page',
@@ -11,14 +13,33 @@ definePageMeta({
 const keyword = ref('')
 const staffStore = useStaffStore()
 let staffLength = ref(0)
-const staffDelete = ref(null);
+const staffData = ref(null);
 const totalPages = ref(0)
 let alertMessage = useCookie('alert-message')
 let alertPage = useCookie('alert-page')
 
+const schema = yup.object({
+  name: yup.string().required('Name is required'),
+  employee_code: yup.string().required('Employee code is required'),
+  username: yup.string().required('Username is required'),
+  email: yup.string().email().required('Email is required'),
+  password: yup.string(),
+});
+
+const { handleSubmit, resetForm, setValues } = useForm({
+  validationSchema: schema,
+});
+
+const { value: name, errorMessage: nameError } = useField('name');
+const { value: employee_code, errorMessage: employeeCodeError } = useField('employee_code');
+const { value: username, errorMessage: usernameError } = useField('username');
+const { value: email, errorMessage: emailError } = useField('email');
+const { value: password, errorMessage: passwordError } = useField('password');
+
 const search = async (event: any) => {
   event.preventDefault()
   staffStore.$state.keyword = keyword.value
+  staffStore.$state.page = 1
   await staffStore.getAllStaff()
   staffLength.value = staffStore.staffAll.length
   totalPages.value = Math.ceil(staffStore.totalPages / staffStore.pageSize)
@@ -30,16 +51,76 @@ const changePage = async (page: number) => {
   staffLength.value = staffStore.staffAll.length
 }
 
+const createStaff = handleSubmit( async (values) => {
+  await staffStore.createStaff(values);
+  if (staffStore.status_code === 200) {
+    Cookies.set('alert-message', 'Successfully create new staff');
+    Cookies.set('alert-page', 'Staff');
+    alertMessage = useCookie('alert-message')
+    alertPage = useCookie('alert-page')
+    setValues({
+      name: '',
+      employee_code: '',
+      username: '',
+      email: '',
+      password: '',
+    });
+    await staffStore.getAllStaff()
+    totalPages.value = Math.ceil(staffStore.totalPages / staffStore.pageSize)
+    staffLength.value = staffStore.staffAll.length
+  }
+});
+
+const removeStaffDetail = async () => {
+  staffData.value = null
+  setValues({
+    name: '',
+    employee_code: '',
+    username: '',
+    email: '',
+  });
+}
+
+const staffDetail = async (staffSelect: any) => {
+  await staffStore.getStaffById(staffSelect.id);
+  staffData.value = staffSelect
+  const staff = staffStore.staff;
+  setValues({
+    name: staff.name,
+    employee_code: staff.employee_code,
+    username: staff.user.username,
+    email: staff.user.email,
+  });
+}
+
+const updateStaff = handleSubmit( async (values) => {
+  await staffStore.updateStaff(values, staffData.value.id);
+  if (staffStore.status_code === 200) {
+    Cookies.set('alert-message', 'Successfully update staff');
+    Cookies.set('alert-page', 'Staff');
+    alertMessage = useCookie('alert-message')
+    alertPage = useCookie('alert-page')
+    setValues({
+      name: '',
+      employee_code: '',
+      username: '',
+      email: '',
+    });
+    staffData.value = null;
+    await staffStore.getAllStaff()
+  }
+});
+
 const confirmDeleteStaff = async () => {
-  if (staffDelete.value) {
-    await staffStore.deleteStaff(staffDelete.value.id);
+  if (staffData.value) {
+    await staffStore.deleteStaff(staffData.value.id);
     if (staffStore.status_code === 200) {
       Cookies.set('alert-message', 'Successfully deleted staff');
       Cookies.set('alert-page', 'Staff');
       alertMessage = useCookie('alert-message')
       alertPage = useCookie('alert-page')
     }
-    staffDelete.value = null;
+    staffData.value = null;
     totalPages.value = Math.ceil(staffStore.totalPages / staffStore.pageSize)
     staffLength.value = staffStore.staffAll.length
   }
@@ -79,15 +160,15 @@ onBeforeRouteUpdate((to, from, next) => {
               <input type="search" class="input w-100" id="search" placeholder="Search staff.."
                      autocomplete="off" v-model="keyword" @keyup="search">
             </form>
-            <NuxtLink :to="{path: `/dashboard/staff/create`}" class="button-primary-small d-none d-md-inline-block">Add
+            <button type="button" class="button-primary-small d-none d-md-inline-block" data-bs-toggle="modal" data-bs-target="#createModal">Add
               New
-              Staff</NuxtLink>
+              Staff</button>
           </div>
           <div class="wrapper-table mt-4">
             <table class="table" style="width:100%">
               <thead>
               <tr>
-                <th>Staff Code</th>
+                <th>Employee Code</th>
                 <th>Name</th>
                 <th>Username</th>
                 <th>Email</th>
@@ -101,17 +182,17 @@ onBeforeRouteUpdate((to, from, next) => {
                 <td>{{staff.user.username}}</td>
                 <td>{{staff.user.email}}</td>
                 <td class="d-flex justify-content-end gap-1 table-mobile" style="width: 200px;">
-                  <NuxtLink :to="{path: `/dashboard/staff/${staff.id}`}"
+                  <button type="button" data-bs-toggle="modal" data-bs-target="#detailModal" @click="staffDetail(staff)"
                             class="wrapper-icon icon-detail d-flex align-items-center justify-content-center">
                     <i class="fa-solid fa-eye" style="font-size: 0.85rem;"></i>
-                  </NuxtLink>
-                  <NuxtLink :to="{path: `/dashboard/staff/edit/${staff.id}`}"
+                  </button>
+                  <button type="button" data-bs-toggle="modal" data-bs-target="#updateModal" @click="staffDetail(staff)"
                             class="wrapper-icon icon-edit d-flex align-items-center justify-content-center">
                     <i class="fa-solid fa-pen-to-square" style="font-size: 0.85rem;"></i>
-                  </NuxtLink>
+                  </button>
                   <button type="button"
                           class="wrapper-icon icon-delete d-flex align-items-center justify-content-center"
-                          data-bs-toggle="modal" data-bs-target="#deleteModal" @click="staffDelete = staff">
+                          data-bs-toggle="modal" data-bs-target="#deleteModal" @click="staffData = staff">
                     <i class="fa-solid fa-trash-can" style="font-size: 0.85rem;"></i>
                   </button>
                 </td>
@@ -135,6 +216,174 @@ onBeforeRouteUpdate((to, from, next) => {
               </ul>
             </nav>
           </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal fade" id="detailModal" tabindex="-1" aria-labelledby="detailModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header d-flex align-items-center justify-content-between">
+            <h1 class="modal-title fs-5" id="detailModalLabel">Detail Staff</h1>
+            <button type="button" data-bs-dismiss="modal" aria-label="Close" @click="removeStaffDetail()">
+              <i class="fa-solid fa-xmark"></i>
+            </button>
+          </div>
+          <div class="modal-body">
+            <form class="form">
+              <div class="row g-3">
+                <div class="col-12">
+                  <div class="input-group d-flex flex-column">
+                    <label for="employee_code">Employee Code</label>
+                    <input type="text" class="input w-100" name="employee_code" id="employee_code"
+                           placeholder="Enter your employee code.." autocomplete="off" v-model="employee_code" readonly>
+                  </div>
+                </div>
+                <div class="col-12">
+                  <div class="input-group d-flex flex-column">
+                    <label for="name">Name</label>
+                    <input type="text" class="input w-100" name="name" id="name"
+                           placeholder="Enter your name.." autocomplete="off" v-model="name" readonly>
+                  </div>
+                </div>
+                <div class="col-12">
+                  <div class="input-group d-flex flex-column">
+                    <label for="username">Username</label>
+                    <input type="text" class="input w-100" name="username" id="username"
+                           placeholder="Enter your username.." autocomplete="off" v-model="username" readonly>
+                  </div>
+                </div>
+                <div class="col-12">
+                  <div class="input-group d-flex flex-column">
+                    <label for="email">Email</label>
+                    <input type="email" class="input w-100" name="email" id="email"
+                           placeholder="Enter your email.." autocomplete="off" v-model="email" readonly>
+                  </div>
+                </div>
+              </div>
+            </form>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="button-reverse" data-bs-dismiss="modal" @click="removeStaffDetail()">Close Modal</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal fade" id="createModal" tabindex="-1" aria-labelledby="createModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <form @submit.prevent="createStaff" class="form w-100">
+            <div class="modal-header d-flex align-items-center justify-content-between">
+              <h1 class="modal-title fs-5" id="createModalLabel">Create New Staff</h1>
+              <button type="button" data-bs-dismiss="modal" aria-label="Close">
+                <i class="fa-solid fa-xmark"></i>
+              </button>
+            </div>
+            <div class="modal-body">
+              <div class="row g-3">
+                <div class="col-12">
+                  <div class="input-group d-flex flex-column">
+                    <label for="employee_code">Employee Code</label>
+                    <input type="text" class="input w-100" name="employee_code" id="employee_code"
+                           placeholder="Enter your employee code.." autocomplete="off" v-model="employee_code">
+                    <p v-if="employeeCodeError" class="invalid-label">{{ employeeCodeError }}</p>
+                  </div>
+                </div>
+                <div class="col-12">
+                  <div class="input-group d-flex flex-column">
+                    <label for="name">Name</label>
+                    <input type="text" class="input w-100" name="name" id="name"
+                           placeholder="Enter your name.." autocomplete="off" v-model="name">
+                    <p v-if="nameError" class="invalid-label">{{ nameError }}</p>
+                  </div>
+                </div>
+                <div class="col-12">
+                  <div class="input-group d-flex flex-column">
+                    <label for="username">Username</label>
+                    <input type="text" class="input w-100" name="username" id="username"
+                           placeholder="Enter your username.." autocomplete="off" v-model="username">
+                    <p v-if="usernameError" class="invalid-label">{{ usernameError }}</p>
+                  </div>
+                </div>
+                <div class="col-12">
+                  <div class="input-group d-flex flex-column">
+                    <label for="email">Email</label>
+                    <input type="email" class="input w-100" name="email" id="email"
+                           placeholder="Enter your email.." autocomplete="off" v-model="email">
+                    <p v-if="emailError" class="invalid-label">{{ emailError }}</p>
+                  </div>
+                </div>
+                <div class="col-12">
+                  <div class="input-group d-flex flex-column">
+                    <label for="password">Password</label>
+                    <input type="password" class="input w-100" name="password" id="password"
+                           placeholder="Enter your password.." autocomplete="off" v-model="password">
+                    <p v-if="passwordError" class="invalid-label">{{ passwordError }}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="button-reverse" data-bs-dismiss="modal">Cancel Add</button>
+              <button type="submit" class="button-primary-small" data-bs-dismiss="modal">Add New Staff</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal fade" id="updateModal" tabindex="-1" aria-labelledby="updateModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <form @submit.prevent="updateStaff" class="form w-100">
+            <div class="modal-header d-flex align-items-center justify-content-between">
+              <h1 class="modal-title fs-5" id="updateModalLabel">Edit Staff</h1>
+              <button type="button" data-bs-dismiss="modal" aria-label="Close" @click="removeStaffDetail()">
+                <i class="fa-solid fa-xmark"></i>
+              </button>
+            </div>
+            <div class="modal-body">
+              <div class="row g-3">
+                <div class="col-12">
+                  <div class="input-group d-flex flex-column">
+                    <label for="employee_code">Employee Code</label>
+                    <input type="text" class="input w-100" name="employee_code" id="employee_code"
+                           placeholder="Enter your employee code.." autocomplete="off" v-model="employee_code">
+                    <p v-if="employeeCodeError" class="invalid-label">{{ employeeCodeError }}</p>
+                  </div>
+                </div>
+                <div class="col-12">
+                  <div class="input-group d-flex flex-column">
+                    <label for="name">Name</label>
+                    <input type="text" class="input w-100" name="name" id="name"
+                           placeholder="Enter your name.." autocomplete="off" v-model="name">
+                    <p v-if="nameError" class="invalid-label">{{ nameError }}</p>
+                  </div>
+                </div>
+                <div class="col-12">
+                  <div class="input-group d-flex flex-column">
+                    <label for="username">Username</label>
+                    <input type="text" class="input w-100" name="username" id="username"
+                           placeholder="Enter your username.." autocomplete="off" v-model="username">
+                    <p v-if="usernameError" class="invalid-label">{{ usernameError }}</p>
+                  </div>
+                </div>
+                <div class="col-12">
+                  <div class="input-group d-flex flex-column">
+                    <label for="email">Email</label>
+                    <input type="email" class="input w-100" name="email" id="email"
+                           placeholder="Enter your email.." autocomplete="off" v-model="email">
+                    <p v-if="emailError" class="invalid-label">{{ emailError }}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="button-reverse" data-bs-dismiss="modal" @click="removeStaffDetail()">Cancel Edit</button>
+              <button type="submit" class="button-primary-small" data-bs-dismiss="modal">Save Changes</button>
+            </div>
+          </form>
         </div>
       </div>
     </div>
