@@ -79,6 +79,7 @@ export const useBundleStore = defineStore('bundle', {
         async updateBundle(updateData: any, bundleId: string) {
             try {
                 const token = useCookie('auth-token')
+                console.log(bundleId)
                 const response = await $fetch(`${apiUrl}/entertainment/packages/${bundleId}`, {
                     method: 'PATCH',
                     headers: { 'Authorization': `Bearer ${token.value}` },
