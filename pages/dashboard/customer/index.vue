@@ -1,7 +1,9 @@
 <script setup lang="ts">
 import { useCustomerStore } from "~/stores/customer";
-import Cookies from 'js-cookie'
 import { ref, onMounted } from 'vue'
+import { useField, useForm } from "vee-validate";
+import Cookies from 'js-cookie'
+import * as yup from "yup";
 
 definePageMeta({
   title: 'Customer Page',
@@ -10,10 +12,26 @@ definePageMeta({
 
 const keyword = ref('')
 const customerStore = useCustomerStore()
+const customerData = ref(null);
 let customerLength = ref(0)
 const totalPages = ref(0)
 let alertMessage = useCookie('alert-message')
 let alertPage = useCookie('alert-page')
+
+const schema = yup.object({
+  name: yup.string().required('Name is required'),
+  username: yup.string().required('Username is required'),
+  email: yup.string().email().required('Email is required'),
+  password: yup.string().required('Password is required'),
+});
+
+const { handleSubmit, resetForm, setValues } = useForm({
+  validationSchema: schema,
+});
+
+const { value: name, errorMessage: nameError } = useField('name');
+const { value: username, errorMessage: usernameError } = useField('username');
+const { value: email, errorMessage: emailError } = useField('email');
 
 const search = async (event: any) => {
   event.preventDefault()
@@ -28,6 +46,26 @@ const changePage = async (page: number) => {
   customerStore.$state.page = page
   await customerStore.getAllCustomer()
   customerLength.value = customerStore.customerAll.length
+}
+
+const removeCustomerDetail = async () => {
+  customerData.value = null
+  setValues({
+    name: '',
+    username: '',
+    email: '',
+  });
+}
+
+const customerDetail = async (customerSelect: any) => {
+  await customerStore.getCustomerById(customerSelect.id);
+  customerData.value = customerSelect
+  const customer = customerStore.customer;
+  setValues({
+    name: customer.name,
+    username: customer.user.username,
+    email: customer.user.email,
+  });
 }
 
 onMounted(async () => {
@@ -81,10 +119,10 @@ onBeforeRouteUpdate((to, from, next) => {
                 <td>{{customer.user.username}}</td>
                 <td>{{customer.user.email}}</td>
                 <td class="d-flex justify-content-end gap-1 table-mobile" style="width: 200px;">
-                  <NuxtLink :to="{path: `/dashboard/customer/${customer.id}`}"
-                            class="wrapper-icon icon-detail d-flex align-items-center justify-content-center">
+                  <button type="button" data-bs-toggle="modal" data-bs-target="#detailModal" @click="customerDetail(customer)"
+                          class="wrapper-icon icon-detail d-flex align-items-center justify-content-center">
                     <i class="fa-solid fa-eye" style="font-size: 0.85rem;"></i>
-                  </NuxtLink>
+                  </button>
                 </td>
               </tr>
               <tr v-else>
@@ -110,21 +148,44 @@ onBeforeRouteUpdate((to, from, next) => {
       </div>
     </div>
 
-    <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+    <div class="modal fade" id="detailModal" tabindex="-1" aria-labelledby="detailModalLabel" aria-hidden="true">
       <div class="modal-dialog">
         <div class="modal-content">
           <div class="modal-header d-flex align-items-center justify-content-between">
-            <h1 class="modal-title fs-5" id="deleteModalLabel">Delete Customer</h1>
-            <button type="button" data-bs-dismiss="modal" aria-label="Close">
+            <h1 class="modal-title fs-5" id="detailModalLabel">Detail Customer</h1>
+            <button type="button" data-bs-dismiss="modal" aria-label="Close" @click="removeCustomerDetail()">
               <i class="fa-solid fa-xmark"></i>
             </button>
           </div>
           <div class="modal-body">
-            <p style="font-size: 0.913rem">Are you sure want to delete this customer?</p>
+            <form class="form">
+              <div class="row g-3">
+                <div class="col-12">
+                  <div class="input-group d-flex flex-column">
+                    <label for="name">Name</label>
+                    <input type="text" class="input w-100" name="name" id="name"
+                           placeholder="Enter your name.." autocomplete="off" v-model="name" readonly>
+                  </div>
+                </div>
+                <div class="col-12">
+                  <div class="input-group d-flex flex-column">
+                    <label for="username">Username</label>
+                    <input type="text" class="input w-100" name="username" id="username"
+                           placeholder="Enter your username.." autocomplete="off" v-model="username" readonly>
+                  </div>
+                </div>
+                <div class="col-12">
+                  <div class="input-group d-flex flex-column">
+                    <label for="email">Email</label>
+                    <input type="email" class="input w-100" name="email" id="email"
+                           placeholder="Enter your email.." autocomplete="off" v-model="email" readonly>
+                  </div>
+                </div>
+              </div>
+            </form>
           </div>
           <div class="modal-footer">
-            <button type="button" class="button-reverse" data-bs-dismiss="modal">Cancel Delete</button>
-            <button type="button" class="button-primary-small" @click="confirmDeleteCustomer" data-bs-dismiss="modal">Delete Customer</button>
+            <button type="button" class="button-reverse" data-bs-dismiss="modal" @click="removeCustomerDetail()">Close Modal</button>
           </div>
         </div>
       </div>
