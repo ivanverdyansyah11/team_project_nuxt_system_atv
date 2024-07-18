@@ -10,6 +10,7 @@ export const useServiceStore = defineStore('service', {
         pageSize: 6,
         totalPages: 0,
         status_code: null,
+        test: null,
     }),
     actions: {
         async getAllServiceWithoutPagination() {
@@ -52,15 +53,18 @@ export const useServiceStore = defineStore('service', {
         async createService(createData: any) {
             try {
                 const token = useCookie('auth-token')
-                const response = await $fetch(`${apiUrl}/entertainment/services`, {
+                const response = await fetch(`${apiUrl}/entertainment/services`, {
                     method: 'POST',
-                    headers: { 'Authorization': `Bearer ${token.value}` },
-                    body: createData
+                    headers: {
+                        'Authorization': `Bearer ${token.value}`,
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(createData)
                 });
-                this.status_code = response?.data ? 200 : null;
-                this.totalPages = response?.meta?.total
+                this.status_code = response?.status;
+                this.totalPages = response?.meta?.total;
             } catch (error) {
-                console.log(error?.message)
+                console.log(error?.message);
             }
         },
         async saveImageService(formData: FormData, serviceId: string) {
