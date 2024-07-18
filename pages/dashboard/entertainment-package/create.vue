@@ -21,7 +21,7 @@ const schema = yup.object({
   name: yup.string().required('Name is required'),
   description: yup.string().required('Description is required'),
   price: yup.number().required('Price is required'),
-  expired_at: yup.date().required('Expired is required'),
+  expired_at: yup.date().required('Expired date is required').typeError('Invalid date format'),
   services: yup.array().min(1, 'At least one service is required'),
   image: yup.mixed().required('Image is required'),
 });
@@ -54,18 +54,14 @@ const previewImage = (e: any) => {
 
 const createBundle = handleSubmit(async (values) => {
   values.services = services.value.map(entertainment_service_id => ({ entertainment_service_id }));
-  const { image, ...valueData } = values;
-
+  values.expired_at = new Date(values.expired_at).toISOString();
   try {
-    valueData.expired_at = valueData.expired_at + ':00Z'
-    await bundleStore.createBundle(valueData);
-
+    await bundleStore.createBundle(values);
     if (bundleStore.status_code === 200 && file.value) {
       await bundleStore.getAllBundleWithoutPagination();
       const formData = new FormData();
       formData.append('image', file.value);
       await bundleStore.saveImageBundle(formData, bundleStore.bundleAll[0].id);
-
       Cookies.set('alert-message', 'Successfully create new package');
       Cookies.set('alert-page', 'Package');
       navigateTo('/dashboard/entertainment-package');
