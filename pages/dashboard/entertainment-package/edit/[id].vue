@@ -5,11 +5,11 @@ import { useField, useForm } from 'vee-validate';
 import * as yup from 'yup';
 import { navigateTo } from "nuxt/app";
 import Cookies from "js-cookie";
-import { onMounted, ref } from 'vue';
+import { onMounted, ref, computed } from 'vue';
 import { useRoute } from '#app';
 
 definePageMeta({
-  title: 'Create Package Page',
+  title: 'Edit Package Page',
   layout: 'dashboard'
 });
 
@@ -40,6 +40,19 @@ const { value: image, errorMessage: imageError } = useField('image');
 const services = ref([]);
 const servicesError = ref('');
 
+const formattedExpiredAt = computed(() => {
+  if (expired_at.value) {
+    const date = new Date(expired_at.value);
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+    return `${year}-${month}-${day}T${hours}:${minutes}`;
+  }
+  return '';
+});
+
 const loadBundle = async() => {
   await bundleStore.getBundleById(route.params.id);
   updateDataImage.value = bundleStore?.bundle?.image_path != null ? `http://localhost:8000/${bundleStore.bundle.image_path}` : 'https://placehold.co/600x400?text=Image+Not+Found';
@@ -49,14 +62,13 @@ const loadBundle = async() => {
     price: bundleStore.bundle.price,
     expired_at: bundleStore.bundle.expired_at,
     image: updateDataImage.value,
-  })
+  });
   services.value = bundleStore.bundle?.services.map(s => s.entertainment_service.id);
 }
 
 const previewImage = (e: any) => {
+  if (!e.target.files.length) return;
   file.value = e.target.files[0];
-  image.value = file.value;
-  if (!file.value) return;
   const reader = new FileReader();
   reader.onload = () => {
     if (typeof reader.result === "string") {
@@ -69,32 +81,25 @@ const previewImage = (e: any) => {
 
 const updateBundle = handleSubmit(async (values) => {
   values.services = services.value.map(entertainment_service_id => ({ entertainment_service_id }));
-  const { image, ...valueData } = values;
-
+  values.expired_at = new Date(values.expired_at).toISOString();
   try {
-    valueData.expired_at = valueData.expired_at + ':00Z'
-    await bundleStore.updateBundle(valueData);
-
-    if (bundleStore.status_code === 200 && file.value) {
-      await bundleStore.getAllBundleWithoutPagination();
+    await bundleStore.updateBundle(values, route.params.id);
+    if (file.value) {
       const formData = new FormData();
       formData.append('image', file.value);
-      await bundleStore.saveImageBundle(formData, bundleStore.bundleAll[0].id);
-
-      Cookies.set('alert-message', 'Successfully update new package');
-      Cookies.set('alert-page', 'Package');
-      navigateTo('/dashboard/entertainment-package');
-    } else {
-      console.error('Failed to update bundle', bundleStore.status_code);
+      await bundleStore.saveImageBundle(formData, bundleStore.bundle.id);
     }
+    Cookies.set('alert-message', 'Successfully update new package');
+    Cookies.set('alert-page', 'Package');
+    navigateTo('/dashboard/entertainment-package');
   } catch (error) {
-    console.error('Error updated bundle:', error);
+    console.error('Error updating bundle:', error);
   }
 });
 
 onMounted(async () => {
   await serviceStore.getAllServiceWithoutPagination();
-  await loadBundle()
+  await loadBundle();
 });
 </script>
 
@@ -136,7 +141,7 @@ onMounted(async () => {
                 <div class="input-group d-flex flex-column">
                   <label for="expired_at">Expired Date</label>
                   <input type="datetime-local" class="input w-100" name="expired_at" id="expired_at"
-                         placeholder="Enter your expired date.." autocomplete="off" v-model="expired_at">
+                         placeholder="Enter your expired date.." autocomplete="off" v-model="formattedExpiredAt">
                   <p v-if="expiredAtError" class="invalid-label">{{ expiredAtError }}</p>
                 </div>
               </div>
