@@ -54,7 +54,6 @@ export const useStaffStore = defineStore('staff', {
         },
         async updateStaff(updateData: any, staffId: string) {
             try {
-                console.log(staffId)
                 const token = useCookie('auth-token')
                 const response = await $fetch(`${apiUrl}/staffs/${staffId}`, {
                     method: 'PATCH',
