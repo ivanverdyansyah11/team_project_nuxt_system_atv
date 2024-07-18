@@ -13,7 +13,7 @@ import Cookies from "js-cookie";
 import {navigateTo} from "nuxt/app";
 
 definePageMeta({
-  title: 'Detail Service Page',
+  title: 'Edit Service Page',
   layout: 'dashboard'
 })
 
@@ -71,9 +71,8 @@ const loadService = async() => {
 }
 
 const previewImage = (e: any) => {
+  if (!e.target.files.length) return;
   file.value = e.target.files[0];
-  image.value = file.value;
-  if (!file.value) return;
   const reader = new FileReader();
   reader.onload = () => {
     if (typeof reader.result === "string") {
@@ -89,26 +88,22 @@ const updateService = handleSubmit(async (values) => {
   values.facilities = facilities.value.map(facility_id => ({ facility_id }));
   values.instructors = instructors.value.map(instructor_id => ({ instructor_id }));
   values.mandatory_luggages = mandatory_luggages.value.map(mandatory_luggage_id => ({ mandatory_luggage_id }));
-  const { image, ...valueData } = values;
 
   try {
-    await serviceStore.updateService(valueData, route.params.id);
-    if (serviceStore.status_code === 200 && file.value) {
-      await serviceStore.getServiceById(route.params.id)
+    await serviceStore.updateService(values, route.params.id);
+    if (file.value) {
       const formData = new FormData();
       formData.append('image', file.value);
       await serviceStore.saveImageService(formData, serviceStore.service.id);
-
-      Cookies.set('alert-message', 'Successfully update service');
-      Cookies.set('alert-page', 'Service');
-      navigateTo('/dashboard/entertainment-service')
-    } else {
-      console.error('Failed to update service', serviceStore.status_code);
     }
+    Cookies.set('alert-message', 'Successfully update service');
+    Cookies.set('alert-page', 'Service');
+    navigateTo('/dashboard/entertainment-service');
   } catch (error) {
-    console.error('Error updated service:', error);
+    console.error('Error updating service:', error);
   }
 });
+
 
 onMounted(async () => {
   await categoryStore.getAllCategoryWithoutPaginate();
