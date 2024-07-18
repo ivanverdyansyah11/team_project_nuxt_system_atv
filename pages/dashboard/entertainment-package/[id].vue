@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { useBundleStore } from "~/stores/bundle";
 import { useServiceStore } from "~/stores/service";
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, computed } from 'vue';
 import { useRoute } from '#app';
 import { formatRupiah } from "~/helpers/FormatRupiah";
 
@@ -16,6 +16,19 @@ const route = useRoute();
 
 await bundleStore.getBundleById(route.params.id);
 const services = ref([]);
+
+const formattedExpiredAt = computed(() => {
+  if (bundleStore.bundle.expired_at) {
+    const date = new Date(bundleStore.bundle.expired_at);
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+    return `${year}-${month}-${day}T${hours}:${minutes}`;
+  }
+  return '';
+});
 
 onMounted(async () => {
   await serviceStore.getAllServiceWithoutPagination();
@@ -53,8 +66,8 @@ onMounted(async () => {
               <div class="col-md-6">
                 <div class="input-group d-flex flex-column">
                   <label for="expired_at">Expired Date</label>
-                  <input type="number" class="input w-100" name="expired_at" id="expired_at"
-                         placeholder="Enter your expired date.." autocomplete="off" v-model="bundleStore.bundle.expired_at">
+                  <input type="datetime-local" class="input w-100" name="expired_at" id="expired_at"
+                         placeholder="Enter your expired date.." autocomplete="off" v-model="formattedExpiredAt" readonly>
                 </div>
               </div>
               <div class="col-12">
