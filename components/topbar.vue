@@ -7,19 +7,31 @@ import profileNotFound from '~/assets/image/profile/profile-not-found.svg' // Im
 const route = useRoute();
 const title = ref('')
 const authStore = useAuthStore();
-const profileImage = authStore?.user?.user?.profile_path != null
+const profileImage = ref(authStore?.user?.user?.profile_path != null
     ? `http://localhost:8000/${authStore?.user?.user?.profile_path}`
-    : profileNotFound; // Use the imported image path
+    : profileNotFound);
+
+watch(
+    () => authStore?.user?.user?.profile_path,
+    (newProfilePath) => {
+      if (newProfilePath) {
+        profileImage.value = `http://localhost:8000/${newProfilePath}`;
+      } else {
+        profileImage.value = profileNotFound;
+      }
+    },
+    { immediate: true }
+);
 
 watch(
     () => route.meta.title,
     (newTitle) => {
       if (newTitle) {
-        title.value = newTitle
+        title.value = newTitle;
       }
     },
     { immediate: true }
-)
+);
 </script>
 
 <template>
@@ -44,5 +56,5 @@ watch(
 </template>
 
 <style scoped>
-
+/* Your scoped styles */
 </style>
