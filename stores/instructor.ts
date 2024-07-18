@@ -65,7 +65,6 @@ export const useInstructorStore = defineStore('instructor', {
         },
         async updateInstructor(updateData: any, instructorId: string) {
             try {
-                console.log(instructorId)
                 const token = useCookie('auth-token')
                 const response = await $fetch(`${apiUrl}/instructors/${instructorId}`, {
                     method: 'PATCH',
