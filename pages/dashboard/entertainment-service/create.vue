@@ -72,16 +72,14 @@ const createService = handleSubmit(async (values) => {
   values.facilities = facilities.value.map(facility_id => ({ facility_id }));
   values.instructors = instructors.value.map(instructor_id => ({ instructor_id }));
   values.mandatory_luggages = mandatory_luggages.value.map(mandatory_luggage_id => ({ mandatory_luggage_id }));
-  const { image, ...valueData } = values;
 
   try {
-    await serviceStore.createService(valueData);
-    if (serviceStore.status_code === 200 && file.value) {
+    await serviceStore.createService(values);
+    if (serviceStore.status_code === 201 && file.value) {
       await serviceStore.getAllServiceWithoutPagination()
       const formData = new FormData();
       formData.append('image', file.value);
       await serviceStore.saveImageService(formData, serviceStore.serviceAll[0].id);
-
       Cookies.set('alert-message', 'Successfully create new service');
       Cookies.set('alert-page', 'Service');
       navigateTo('/dashboard/entertainment-service')
