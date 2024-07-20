@@ -1,3 +1,19 @@
+@media (max-width: 1399.98px) {
+    .headline {
+        font-size: 3.25rem;
+    }
+}
+
+@media (max-width: 1199.98px) {
+    .headline {
+        font-size: 2.75rem;
+    }
+
+    .title {
+        font-size: 2.25rem;
+    }
+}
+
 @media (max-width: 991.98px) {
     .sidebar {
         left: -260px;
@@ -12,11 +28,83 @@
     .dashboard {
         padding-left: 0;
     }
+
+    .headline {
+        font-size: 3rem;
+    }
+
+    .homepage section.hero {
+        height: fit-content;
+        padding-top: 120px;
+    }
+
+    .homepage section.gallery .gallery-image.image-square img {
+        width: 100%;
+        aspect-ratio: 4/2;
+        object-fit: cover;
+    }
+}
+
+@media (max-width: 767.98px) {
+    .headline {
+        font-size: 2.625rem;
+    }
+
+    .title {
+        font-size: 2rem;
+    }
+
+    .content-gap {
+        margin-top: 42px;
+    }
+
+    .section-gap {
+        padding-top: 82px;
+    }
+
+    .section-gap-margin {
+        margin-top: 82px;
+    }
+
+    .homepage section.why-choose-us .content-value h2 {
+        font-size: 1.375rem;
+        font-family: var(--urbanist-semibold);
+    }
+
+    .homepage section.why-choose-us .content-value h6 {
+        font-size: 1em;
+        font-family: var(--urbanist-medium);
+    }
+
+    .homepage section.package .card-package h6 {
+        font-size: 1rem;
+        margin-top: 8px;
+        margin-bottom: 2px;
+    }
+
+    .homepage section.package .card-package p {
+        font-size: 0.875rem;
+        margin-bottom: 0;
+    }
+
+    .homepage section.gallery .gallery-image.image-square img {
+        aspect-ratio: 1/1;
+    }
+
+    .homepage section.gallery .gallery-image.image-landscape img {
+        aspect-ratio: 1/1;
+    }
 }
 
 @media (min-width: 992px) {
     .topbar,
     .dashboard .content {
         padding: 0 42px;
+    }
+
+    .homepage section.package .content-value > .col:nth-child(1),
+    .homepage section.package .content-value > .col:nth-child(2),
+    .homepage section.package .content-value > .col:nth-child(3) {
+        margin-top: 0;
     }
 }

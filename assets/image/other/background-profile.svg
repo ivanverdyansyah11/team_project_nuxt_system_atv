@@ -1,0 +1,14 @@
+<svg width="1280" height="250" viewBox="0 0 1280 250" fill="none" xmlns="http://www.w3.org/2000/svg">
+<rect width="1280" height="250" fill="#FF8D3C"/>
+<mask id="mask0_2861_9544" style="mask-type:alpha" maskUnits="userSpaceOnUse" x="0" y="0" width="1280" height="250">
+<rect width="1280" height="250" fill="#F67F2B"/>
+</mask>
+<g mask="url(#mask0_2861_9544)">
+<ellipse cx="526.5" cy="185.5" rx="303.5" ry="285.5" fill="#FFF6A3" fill-opacity="0.15"/>
+<ellipse cx="804.5" cy="270.5" rx="140.5" ry="133.5" fill="#FFF6A3" fill-opacity="0.15"/>
+<ellipse cx="98.5" cy="40.5" rx="114.5" ry="112.5" fill="#FFF6A3" fill-opacity="0.21"/>
+<path d="M1112 48.5C1112 109.854 1059.41 162 991.5 162C923.587 162 871 109.854 871 48.5C871 -12.8539 923.587 -65 991.5 -65C1059.41 -65 1112 -12.8539 1112 48.5Z" stroke="#FFF6A3" stroke-opacity="0.21" stroke-width="60"/>
+<path d="M199 217C199 273.265 156.81 317 107 317C57.19 317 15 273.265 15 217C15 160.735 57.19 117 107 117C156.81 117 199 160.735 199 217Z" stroke="#FFF6A3" stroke-opacity="0.21" stroke-width="30"/>
+<path d="M1278 237C1278 311.219 1217 372 1141 372C1065 372 1004 311.219 1004 237C1004 162.781 1065 102 1141 102C1217 102 1278 162.781 1278 237Z" stroke="#FFF6A3" stroke-opacity="0.21" stroke-width="60"/>
+</g>
+</svg>

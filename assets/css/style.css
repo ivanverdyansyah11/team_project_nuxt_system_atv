@@ -82,6 +82,51 @@ body {
 /* END BASE */
 
 /* BASE TEMPLATE */
+.headline {
+    font-size: 3.5rem;
+    font-family: var(--urbanist-bold);
+    line-height: 112%;
+}
+
+.title {
+    font-size: 2.5rem;
+    font-family: var(--urbanist-bold);
+    line-height: 130%;
+}
+
+.subtitle {
+    font-size: 0.913rem;
+    color: rgba(var(--primary-color), 1);
+    background-color: rgba(var(--primary-color), 0.06);
+    border: 1px solid rgba(var(--primary-color), 0.32);
+    border-radius: 4px;
+    padding: 10px 12px;
+    width: fit-content;
+}
+
+.description {
+    font-size: 0.913rem;
+    color: rgba(var(--dark-color), 0.62);
+}
+
+.section-gap-margin {
+    margin-top: 120px;
+}
+
+.section-gap {
+    padding-top: 120px;
+}
+
+.content-gap {
+    margin-top: 56px;
+}
+
+.background-primary {
+    background-color: rgba(var(--primary-color), 0.06);
+    padding-top: 82px;
+    padding-bottom: 82px;
+}
+
 form.form .input-group {
     width: 100%;
 }
@@ -548,26 +593,6 @@ form.form .input-group .input-hide {
     color: rgba(var(--primary-color), 1);
 }
 
-.topbar .popup-topbar .profile-topbar {
-    width: 15px;
-    height: 15px;
-    background-image: url('../img/button/profile-topbar.svg');
-    background-repeat: no-repeat;
-    background-size: cover;
-    background-position: center;
-    opacity: 0.52;
-}
-
-.topbar .popup-topbar .logout-topbar {
-    width: 15px;
-    height: 15px;
-    background-image: url('../img/button/logout-topbar.svg');
-    background-repeat: no-repeat;
-    background-size: cover;
-    background-position: center;
-    opacity: 0.52;
-}
-
 .topbar .popup-topbar .modal-topbar .wrapper.active > .wrapper-topbar .profile-topbar,
 .topbar .popup-topbar .modal-topbar .wrapper.active > .wrapper-topbar .logout-topbar,
 .topbar .popup-topbar .modal-topbar .wrapper:hover > .wrapper-topbar .profile-topbar,
@@ -774,3 +799,202 @@ html {
     border-color: rgba(var(--red-color), 0.12);
 }
 /* END DASHBOARD */
+
+
+/* NAVBAR */
+.navbar {
+    background-color: rgba(var(--light-color), 1) !important;
+    border-bottom: 1px solid rgba(var(--dark-color), 0.12);
+    height: 86px !important;
+}
+
+.navbar .nav-link {
+    font-size: 0.95rem;
+    color: rgba(var(--primary-color), 1);
+}
+
+.navbar .nav-link.active,
+.navbar .nav-link:hover {
+    text-decoration: underline;
+}
+/* END NAVBAR */
+
+
+/* COMPONENT HOMEPAGE */
+.homepage section.hero {
+    height: 100vh;
+    padding-top: 86px;
+}
+
+.homepage section.hero .headline {
+    margin-bottom: 12px;
+}
+
+.homepage section.hero .description {
+    margin-bottom: 36px;
+}
+
+.homepage section.hero .button-group {
+    padding-bottom: 24px;
+    border-bottom: 1px solid rgba(var(--dark-color), 0.12);
+    margin-bottom: 24px;
+}
+
+.homepage section.hero .title-value {
+    font-size: 2.25rem;
+    font-family: var(--urbanist-bold);
+    color: rgba(var(--primary-color), 1);
+    text-align: center;
+}
+
+.homepage section.hero .caption-value {
+    text-align: center;
+    font-size: 0.875rem;
+    color: rgba(var(--dark-color), 0.62);
+}
+
+.homepage section.why-choose-us .title {
+    color: rgba(var(--primary-color), 1);
+}
+
+.homepage section.why-choose-us .content-value h2 {
+    width: 62px;
+    height: 62px;
+    border-radius: 9999px;
+    background-color: rgba(var(--primary-color), 0.06);
+    border: 1px solid rgba(var(--primary-color), 0.32);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.75rem;
+    color: rgba(var(--primary-color), 1);
+    font-family: var(--urbanist-bold);
+}
+
+.homepage section.why-choose-us .content-value h6 {
+    font-size: 1.25em;
+    color: rgba(var(--primary-color), 1);
+    font-family: var(--urbanist-semibold);
+}
+
+.homepage section.about .subtitle {
+    margin-bottom: 6px;
+}
+
+.homepage section.about .title {
+    margin-bottom: 12px;
+}
+
+.homepage section.about .description-group {
+    margin-bottom: 36px;
+}
+
+.homepage section.about .button-sosmed {
+    width: 42px;
+    height: 42px;
+    border-radius: 3px;
+    background-color: rgba(var(--primary-color), 0.06);
+    border: 1px solid rgba(var(--primary-color), 0.32);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.homepage section.about .button-sosmed i {
+    font-size: 1.125rem;
+    color: rgba(var(--primary-color), 1);
+}
+
+.homepage section.about .button-sosmed:last-child i {
+    font-size: 0.95rem;
+}
+
+.homepage section.about .button-sosmed:hover {
+    background-color: rgba(var(--primary-color), 1);
+}
+
+.homepage section.about .button-sosmed:hover i {
+    color: rgba(var(--light-color), 1);
+}
+
+.homepage section.package .title {
+    color: rgba(var(--primary-color), 1);
+}
+
+.homepage section.package .content-value > .col:nth-child(1),
+.homepage section.package .content-value > .col:nth-child(2) {
+    margin-top: 0;
+}
+
+.homepage section.package .card-package .package-image {
+    padding: 12px;
+    border: 1px solid rgba(var(--primary-color), 0.12);
+    background-color: rgba(var(--primary-color), 0.06);
+    border-radius: 6px;
+}
+
+.homepage section.package .card-package .package-image:hover img {
+    transform: scale(1.01);
+}
+
+.homepage section.package .card-package .package-image img {
+    width: 100%;
+    aspect-ratio: 4/2.6;
+    object-fit: cover;
+    border-radius: 4px;
+}
+
+.homepage section.package .card-package h6 {
+    font-size: 1.125rem;
+    font-family: var(--urbanist-semibold);
+    margin-top: 12px;
+    margin-bottom: 4px;
+}
+
+.homepage section.package .card-package:hover h6 {
+    color: rgba(var(--primary-color), 1);
+    text-decoration: underline;
+}
+
+.homepage section.package .card-package p {
+    font-size: 0.913rem;
+    color: rgba(var(--dark-color), 0.62);
+    margin-bottom: 12px;
+}
+
+.homepage section.package .card-package .button-reverse {
+    background-color: transparent !important;
+}
+
+.homepage section.package .card-package:hover .button-reverse {
+    background-color: rgba(var(--primary-color), 1) !important;
+    color: rgba(var(--light-color), 1) !important;
+}
+
+.homepage section.gallery .gallery-image {
+    overflow: hidden;
+    border-radius: 6px;
+}
+
+.homepage section.gallery .gallery-image img {
+    width: 100%;
+    height: 100%;
+}
+
+.homepage section.gallery .gallery-image:hover img {
+    transform: scale(1.02);
+    border-radius: 6px;
+}
+
+.homepage section.gallery .gallery-image.image-square img {
+    width: 100%;
+    aspect-ratio: 1/1;
+    object-fit: cover;
+}
+
+.homepage section.gallery .gallery-image.image-landscape img {
+    width: 100%;
+    aspect-ratio: 4/2;
+    object-fit: cover;
+}
+/* END COMPONENT HOMEPAGE */

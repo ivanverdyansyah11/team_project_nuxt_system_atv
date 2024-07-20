@@ -21,6 +21,7 @@ export default defineNuxtConfig({
   },
   css: [
     'bootstrap/dist/css/bootstrap.min.css',
+    'lightgallery/css/lightgallery.css',
     '@/assets/css/style.css',
     '@/assets/css/responsive.css',
   ],
