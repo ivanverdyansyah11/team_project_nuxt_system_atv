@@ -118,7 +118,7 @@ body {
 }
 
 .content-gap {
-    margin-top: 56px;
+    margin-top: 48px;
 }
 
 .background-primary {
@@ -816,6 +816,7 @@ html {
 .navbar .nav-link.active,
 .navbar .nav-link:hover {
     text-decoration: underline;
+    color: rgba(var(--primary-color), 1);
 }
 /* END NAVBAR */
 
@@ -960,6 +961,10 @@ html {
     font-size: 0.913rem;
     color: rgba(var(--dark-color), 0.62);
     margin-bottom: 12px;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    overflow: hidden;
 }
 
 .homepage section.package .card-package .button-reverse {
@@ -997,4 +1002,403 @@ html {
     aspect-ratio: 4/2;
     object-fit: cover;
 }
+
+.homepage section.instructor .card-instructor {
+    padding: 16px;
+    border-radius: 6px;
+    background-color: rgba(var(--primary-color), 0.06);
+    border: 1px solid rgba(var(--primary-color), 0.32);
+}
+
+.homepage section.instructor .card-instructor img {
+    width: 100%;
+    aspect-ratio: 1/1;
+    border-radius: 5px;
+    object-fit: cover;
+}
+
+.homepage section.instructor .card-instructor h6 {
+    font-size: 1rem;
+    font-family: var(--urbanist-semibold);
+    color: rgba(var(--primary-color), 1);
+    margin-top: 8px;
+    margin-bottom: 6px;
+}
+
+.homepage section.instructor .card-instructor .instructor-scroll {
+    width: 100%;
+    overflow-x: auto;
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+
+.homepage section.instructor .card-instructor .instructor-scroll::-webkit-scrollbar {
+    display: none;
+}
+
+.homepage section.instructor .card-instructor .instructor-scroll .instructor-service {
+    width: 100%;
+}
+
+.homepage section.instructor .card-instructor .instructor-scroll .instructor-service span {
+    text-wrap: nowrap;
+    font-size: 0.813rem;
+    color: rgba(var(--primary-color), 1);
+    padding: 6px 8px;
+    border-radius: 4px;
+    background-color: rgba(var(--primary-color), 0.08);
+    width: fit-content;
+}
+
+.homepage section.blog .card-blog .blog-image,
+.homepage section.detail-blog .blog-image {
+    padding: 12px;
+    border: 1px solid rgba(var(--primary-color), 0.12);
+    background-color: rgba(var(--primary-color), 0.06);
+    border-radius: 6px;
+}
+
+.homepage section.blog .card-blog .blog-image img,
+.homepage section.detail-blog .blog-image img {
+    width: 100%;
+    aspect-ratio: 4/2.6;
+    object-fit: cover;
+    border-radius: 4px;
+}
+
+.homepage section.blog .card-blog:hover img {
+    transform: scale(1.01);
+}
+
+.homepage section.blog .card-blog h6 {
+    font-size: 1.083rem;
+    font-family: var(--urbanist-semibold);
+    margin-top: 12px;
+    margin-bottom: 4px;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    overflow: hidden;
+}
+
+.homepage section.blog .card-blog > p {
+    font-size: 0.875rem;
+    color: rgba(var(--dark-color), 0.62);
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 3;
+    overflow: hidden;
+    margin-bottom: 12px;
+}
+
+.homepage section.blog .card-blog .wrapper a {
+    font-size: 0.875rem;
+    color: rgba(var(--primary-color), 1);
+}
+
+.homepage section.blog .card-blog .wrapper a:hover {
+    text-decoration: underline;
+}
+
+.homepage section.blog .card-blog .wrapper p {
+    font-size: 0.875rem;
+    font-family: var(--urbanist-semibold);
+}
+
+.homepage section.hero-small {
+    padding-top: 120px;
+}
+
+.homepage section.hero-small .headline {
+    margin-bottom: 14px;
+}
+
+.homepage section.hero-small .description {
+    margin-bottom: 42px;
+}
+
+.homepage section.hero-small .input-search {
+    padding: 15px;
+    font-size: 0.913rem;
+    color: rgba(var(--primary-color), 1);
+    background-color: rgba(var(--primary-color), 0.06);
+    border: 1px solid rgba(var(--primary-color), 0.32);
+    border-radius: 4px;
+    stroke: none;
+    outline: none;
+    width: 100%;
+}
+
+.homepage section.hero-small .input-search::placeholder {
+    font-size: 0.913rem;
+    color: rgba(var(--primary-color), 1);
+}
+
+.homepage section.detail-blog .title {
+    margin-bottom: 12px;
+}
+
+.homepage section.detail-blog .wrapper {
+    margin-bottom: 42px;
+}
+
+.homepage section.detail-blog .wrapper > p:first-child {
+    font-size: 0.875rem;
+    padding: 6px 8px;
+    background-color: rgba(var(--primary-color), 0.06);
+    border: 1px solid rgba(var(--primary-color), 0.32);
+    border-radius: 4px;
+    color: rgba(var(--primary-color), 1);
+}
+
+.homepage section.detail-blog .wrapper > p:last-child {
+    font-size: 0.913rem;
+    color: rgba(var(--dark-color), 0.62);
+}
+
+.homepage section.detail-blog .blog-list {
+    margin-top: 42px;
+}
+
+.homepage section.detail-blog .blog-list .title,
+.homepage section.detail-blog .other-blog .title,
+.homepage .title-small {
+    font-size: 1.75rem;
+    font-family: var(--urbanist-bold);
+    line-height: 120%;
+    margin-bottom: 6px;
+}
+
+.homepage section.detail-blog .blog-list .description {
+    margin-bottom: 16px;
+}
+
+.homepage section.detail-blog .blog-list .item {
+    position: relative;
+    font-size: 0.913rem;
+    color: rgba(var(--primary-color), 1);
+    padding-left: 18px;
+}
+
+.homepage section.detail-blog .blog-list .item:before {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 0;
+    transform: translateY(-50%);
+    width: 8px;
+    height: 8px;
+    border-radius: 9999px;
+    background-color: rgba(var(--primary-color), 1);
+}
+
+.homepage section.detail-blog .other-blog {
+    border-left: 1px solid rgba(var(--dark-color), 0.12);
+    height: 100%;
+}
+
+.homepage section.detail-blog .other-blog .title {
+    margin-bottom: 36px;
+}
+
+.homepage section.hero .wrapper-banner,
+.homepage section.hero-small .wrapper-banner {
+    padding: 12px;
+    background-color: rgba(var(--dark-color), 0.04);
+    border-radius: 6px;
+    border: 1px solid rgba(var(--dark-color), 0.12);
+}
+
+.homepage section.hero .wrapper-banner .banner-image,
+.homepage section.hero-small .wrapper-banner .banner-image {
+    width: 100%;
+    aspect-ratio: 1/1;
+    object-fit: cover;
+    border-radius: 4px;
+}
+
+.homepage section.hero .wrapper-banner img:nth-child(1),
+.homepage section.hero-small .wrapper-banner img:nth-child(1) {
+    position: absolute;
+    top: -5%;
+    left: -8%;
+    width: 70%;
+    height: 70%;
+}
+
+.homepage section.hero .wrapper-banner img:nth-child(2),
+.homepage section.hero-small .wrapper-banner img:nth-child(2) {
+    position: absolute;
+    bottom: -5%;
+    right: -8%;
+    width: 70%;
+    height: 70%;
+}
+
+.homepage section.service .card-service {
+    padding: 8px;
+    background-color: transparent;
+    border: 1px solid rgba(var(--dark-color), 0.12);
+    border-radius: 6px;
+}
+
+.homepage section.service .card-service img {
+    width: 100%;
+    aspect-ratio: 4/2.6;
+    object-fit: cover;
+    border-radius: 4px;
+}
+
+.homepage section.service .card-service h6 {
+    font-size: 1rem;
+    color: rgba(var(--dark-color), 1);
+    margin-top: 8px;
+    margin-bottom: 2px;
+    font-family: var(--urbanist-semibold);
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 1;
+    overflow: hidden;
+}
+
+.homepage section.service .card-service p {
+    font-size: 0.875rem;
+    color: rgba(var(--dark-color), 0.62);
+    margin-bottom: 12px;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    overflow: hidden;
+}
+
+.homepage section.detail-service .title-small {
+    margin-bottom: 16px;
+}
+
+.homepage section.detail-service .detail-list p {
+    color: rgba(var(--dark-color), 0.62);
+    font-size: 0.95rem;
+}
+
+.homepage section.detail-service .detail-list p i {
+    font-size: 1.125rem;
+    color: rgba(var(--primary-color), 1);
+}
 /* END COMPONENT HOMEPAGE */
+
+
+/* FOOTER */
+footer.footer {
+    padding-top: 100px;
+    background-color: rgba(var(--dark-color), 1);
+}
+
+footer.footer .brand-image {
+    margin-bottom: 16px;
+}
+
+footer.footer p {
+    color: rgba(var(--light-color), 0.62);
+    font-size: 0.875rem;
+    margin-bottom: 24px;
+}
+
+footer.footer .footer-sosmed .sosmed {
+    width: 42px;
+    height: 42px;
+    border-radius: 3px;
+    background-color: rgba(var(--light-color), 0.06);
+    border: 1px solid rgba(var(--light-color), 0.12);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+
+footer.footer .footer-sosmed .sosmed:hover {
+    border-color: rgba(var(--light-color), 0.32);
+}
+
+footer.footer .footer-sosmed .sosmed i {
+    font-size: 1rem;
+    color: rgba(var(--light-color), 1);
+}
+
+footer.footer h6 {
+    font-size: 1.125rem;
+    color: rgba(var(--primary-color), 1);
+    margin-bottom: 12px;
+    font-family: var(--urbanist-semibold);
+}
+
+footer.footer .footer-link a,
+footer.footer .footer-link a i {
+    font-size: 0.913rem;
+    color: rgba(var(--light-color), 0.62);
+}
+
+footer.footer .footer-link a i {
+    font-size: 1rem;
+}
+
+footer.footer .footer-link a:hover {
+    color: rgba(var(--light-color), 1);
+}
+
+footer.footer .footer-search {
+    position: relative;
+    width: 100%;
+}
+
+footer.footer .footer-search input {
+    padding: 13px;
+    background-color: rgba(var(--light-color), 0.06);
+    border: 1px solid rgba(var(--light-color), 0.12);
+    border-radius: 4px;
+    font-size: 0.875rem;
+    color: rgba(var(--light-color), 0.62);
+    stroke: none;
+    outline: none;
+    width: 100%;
+}
+
+footer.footer .footer-search input:hover,
+footer.footer .footer-search input:not(:placeholder-shown) {
+    border-color: rgba(var(--light-color), 0.24);
+}
+
+footer.footer .footer-search input::placeholder {
+    font-size: 0.875rem;
+    color: rgba(var(--light-color), 0.62);
+}
+
+footer.footer .footer-search button {
+    position: absolute;
+    top: 50%;
+    right: 3px;
+    transform: translateY(-50%);
+    padding: 10px 16px;
+    background-color: rgba(var(--light-color), 1);
+    color: rgba(var(--dark-color), 1);
+    font-size: 0.875rem;
+    border: 1px solid rgba(var(--light-color), 0.12);
+    stroke: none;
+    outline: none;
+    border-radius: 2px;
+}
+
+footer.footer .footer-search button:hover {
+    background-color: rgba(var(--dark-color), 1);
+    color: rgba(var(--light-color), 1);
+}
+
+footer.footer .copyright {
+    padding-top: 20px;
+    padding-bottom: 20px;
+    margin-top: 100px;
+    margin-bottom: 0;
+    font-size: 0.875rem;
+    color: rgba(var(--light-color), 0.62);
+    text-align: center;
+}
+/* END FOOTER */
