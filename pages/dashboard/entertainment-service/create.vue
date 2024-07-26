@@ -18,21 +18,23 @@ definePageMeta({
 
 const serviceStore = useServiceStore();
 const categoryStore = useCategoryStore();
-const routeStore = useRouteStore();
-const facilityStore = useFacilityStore();
-const instructorStore = useInstructorStore();
-const luggageStore = useLuggageStore();
+// const routeStore = useRouteStore();
+// const facilityStore = useFacilityStore();
+// const instructorStore = useInstructorStore();
+// const luggageStore = useLuggageStore();
 const createDataImage = ref('https://placehold.co/600x400?text=Image+Not+Found');
 const file = ref(null);
 
 const schema = yup.object({
   name: yup.string().required('Name is required'),
   price: yup.number().required('Price is required'),
+  duration: yup.number().required('Duration is required'),
+  description: yup.string().required('Description is required'),
   entertainment_category_id: yup.string().required('Entertainment Category is required'),
-  routes: yup.array().min(1, 'At least one route is required'),
-  facilities: yup.array().min(1, 'At least one facility is required'),
-  instructors: yup.array().min(1, 'At least one instructor is required'),
-  mandatory_luggages: yup.array().min(1, 'At least one mandatory luggage is required'),
+  // routes: yup.array().min(1, 'At least one route is required'),
+  // facilities: yup.array().min(1, 'At least one facility is required'),
+  // instructors: yup.array().min(1, 'At least one instructor is required'),
+  // mandatory_luggages: yup.array().min(1, 'At least one mandatory luggage is required'),
   image: yup.mixed().required('Image is required'),
 });
 
@@ -42,16 +44,18 @@ const { handleSubmit, resetForm, setValues } = useForm({
 
 const { value: name, errorMessage: nameError } = useField('name');
 const { value: price, errorMessage: priceError } = useField('price');
+const { value: duration, errorMessage: durationError } = useField('duration');
+const { value: description, errorMessage: descriptionError } = useField('description');
 const { value: entertainment_category_id, errorMessage: entertainmentCategoryIdError } = useField('entertainment_category_id');
 const { value: image, errorMessage: imageError } = useField('image');
-const routes = ref([]);
-const routesError = ref('');
-const facilities = ref([]);
-const facilitiesError = ref('');
-const instructors = ref([]);
-const instructorsError = ref('');
-const mandatory_luggages = ref([]);
-const mandatoryLuggagesError = ref('');
+// const routes = ref([]);
+// const routesError = ref('');
+// const facilities = ref([]);
+// const facilitiesError = ref('');
+// const instructors = ref([]);
+// const instructorsError = ref('');
+// const mandatory_luggages = ref([]);
+// const mandatoryLuggagesError = ref('');
 
 const previewImage = (e: any) => {
   file.value = e.target.files[0];
@@ -68,10 +72,10 @@ const previewImage = (e: any) => {
 }
 
 const createService = handleSubmit(async (values) => {
-  values.routes = routes.value.map(route_id => ({ route_id }));
-  values.facilities = facilities.value.map(facility_id => ({ facility_id }));
-  values.instructors = instructors.value.map(instructor_id => ({ instructor_id }));
-  values.mandatory_luggages = mandatory_luggages.value.map(mandatory_luggage_id => ({ mandatory_luggage_id }));
+  // values.routes = routes.value.map(route_id => ({ route_id }));
+  // values.facilities = facilities.value.map(facility_id => ({ facility_id }));
+  // values.instructors = instructors.value.map(instructor_id => ({ instructor_id }));
+  // values.mandatory_luggages = mandatory_luggages.value.map(mandatory_luggage_id => ({ mandatory_luggage_id }));
 
   try {
     await serviceStore.createService(values);
@@ -93,10 +97,10 @@ const createService = handleSubmit(async (values) => {
 
 onMounted(async () => {
   await categoryStore.getAllCategoryWithoutPaginate()
-  await routeStore.getAllRouteWithoutPaginate()
-  await facilityStore.getAllFacilityWithoutPaginate()
-  await instructorStore.getAllInstructorWithoutPaginate()
-  await luggageStore.getAllLuggageWithoutPaginate()
+  // await routeStore.getAllRouteWithoutPaginate()
+  // await facilityStore.getAllFacilityWithoutPaginate()
+  // await instructorStore.getAllInstructorWithoutPaginate()
+  // await luggageStore.getAllLuggageWithoutPaginate()
 })
 </script>
 
@@ -134,7 +138,7 @@ onMounted(async () => {
                   <p v-if="priceError" class="invalid-label">{{ priceError }}</p>
                 </div>
               </div>
-              <div class="col-12">
+              <div class="col-md-6">
                 <div class="input-group d-flex flex-column">
                   <label for="entertainment_category_id">Entertainment Category</label>
                   <select class="input w-100" name="entertainment_category_id" id="entertainment_category_id" v-model="entertainment_category_id">
@@ -145,52 +149,68 @@ onMounted(async () => {
               </div>
               <div class="col-md-6">
                 <div class="input-group d-flex flex-column">
-                  <label>Routes</label>
-                  <div class="wrapper-checkbox d-flex gap-2 flex-wrap">
-                    <div class="checkbox d-flex align-items-center gap-2 me-2" v-for="(route, index) in routeStore.routeAll" :key="index">
-                      <input type="checkbox" :id="route.id" :value="route.id" v-model="routes">
-                      <label class="mb-0" :for="route.id">{{route.address}}</label>
-                    </div>
-                  </div>
-                  <p v-if="routesError" class="invalid-label">{{ routesError }}</p>
+                  <label for="duration">Duration</label>
+                  <input type="number" class="input w-100" name="duration" id="duration"
+                         placeholder="Enter your duration.." autocomplete="off" v-model="duration">
+                  <p v-if="durationError" class="invalid-label">{{ durationError }}</p>
                 </div>
               </div>
-              <div class="col-md-6">
+              <div class="col-12">
                 <div class="input-group d-flex flex-column">
-                  <label>Facilities</label>
-                  <div class="wrapper-checkbox d-flex gap-2 flex-wrap">
-                    <div class="checkbox d-flex align-items-center gap-2 me-2" v-for="(facility, index) in facilityStore.facilityAll" :key="index">
-                      <input type="checkbox" :id="facility.id" :value="facility.id" v-model="facilities">
-                      <label class="mb-0" :for="facility.id">{{facility.name}}</label>
-                    </div>
-                  </div>
-                  <p v-if="facilitiesError" class="invalid-label">{{ facilitiesError }}</p>
+                  <label for="description">Description</label>
+                  <textarea class="input w-100" name="description" id="description"
+                            placeholder="Enter your description.." autocomplete="off" v-model="description" rows="4"></textarea>
+                  <p v-if="descriptionError" class="invalid-label">{{ descriptionError }}</p>
                 </div>
               </div>
-              <div class="col-md-6">
-                <div class="input-group d-flex flex-column">
-                  <label>Instructor</label>
-                  <div class="wrapper-checkbox d-flex gap-2 flex-wrap">
-                    <div class="checkbox d-flex align-items-center gap-2 me-2" v-for="(instructor, index) in instructorStore.instructorAll" :key="index">
-                      <input type="checkbox" :id="instructor.id" :value="instructor.id" v-model="instructors">
-                      <label class="mb-0" :for="instructor.id">{{instructor.name}}</label>
-                    </div>
-                  </div>
-                  <p v-if="instructorsError" class="invalid-label">{{ instructorsError }}</p>
-                </div>
-              </div>
-              <div class="col-md-6">
-                <div class="input-group d-flex flex-column">
-                  <label>Mandatory Luggage</label>
-                  <div class="wrapper-checkbox d-flex gap-2 flex-wrap">
-                    <div class="checkbox d-flex align-items-center gap-2 me-2" v-for="(luggage, index) in luggageStore.luggageAll" :key="index">
-                      <input type="checkbox" :id="luggage.id" :value="luggage.id" v-model="mandatory_luggages">
-                      <label class="mb-0" :for="luggage.id">{{luggage.name}}</label>
-                    </div>
-                  </div>
-                  <p v-if="mandatoryLuggagesError" class="invalid-label">{{ mandatoryLuggagesError }}</p>
-                </div>
-              </div>
+<!--              <div class="col-md-6">-->
+<!--                <div class="input-group d-flex flex-column">-->
+<!--                  <label>Routes</label>-->
+<!--                  <div class="wrapper-checkbox d-flex gap-2 flex-wrap">-->
+<!--                    <div class="checkbox d-flex align-items-center gap-2 me-2" v-for="(route, index) in routeStore.routeAll" :key="index">-->
+<!--                      <input type="checkbox" :id="route.id" :value="route.id" v-model="routes">-->
+<!--                      <label class="mb-0" :for="route.id">{{route.address}}</label>-->
+<!--                    </div>-->
+<!--                  </div>-->
+<!--                  <p v-if="routesError" class="invalid-label">{{ routesError }}</p>-->
+<!--                </div>-->
+<!--              </div>-->
+<!--              <div class="col-md-6">-->
+<!--                <div class="input-group d-flex flex-column">-->
+<!--                  <label>Facilities</label>-->
+<!--                  <div class="wrapper-checkbox d-flex gap-2 flex-wrap">-->
+<!--                    <div class="checkbox d-flex align-items-center gap-2 me-2" v-for="(facility, index) in facilityStore.facilityAll" :key="index">-->
+<!--                      <input type="checkbox" :id="facility.id" :value="facility.id" v-model="facilities">-->
+<!--                      <label class="mb-0" :for="facility.id">{{facility.name}}</label>-->
+<!--                    </div>-->
+<!--                  </div>-->
+<!--                  <p v-if="facilitiesError" class="invalid-label">{{ facilitiesError }}</p>-->
+<!--                </div>-->
+<!--              </div>-->
+<!--              <div class="col-md-6">-->
+<!--                <div class="input-group d-flex flex-column">-->
+<!--                  <label>Instructor</label>-->
+<!--                  <div class="wrapper-checkbox d-flex gap-2 flex-wrap">-->
+<!--                    <div class="checkbox d-flex align-items-center gap-2 me-2" v-for="(instructor, index) in instructorStore.instructorAll" :key="index">-->
+<!--                      <input type="checkbox" :id="instructor.id" :value="instructor.id" v-model="instructors">-->
+<!--                      <label class="mb-0" :for="instructor.id">{{instructor.name}}</label>-->
+<!--                    </div>-->
+<!--                  </div>-->
+<!--                  <p v-if="instructorsError" class="invalid-label">{{ instructorsError }}</p>-->
+<!--                </div>-->
+<!--              </div>-->
+<!--              <div class="col-md-6">-->
+<!--                <div class="input-group d-flex flex-column">-->
+<!--                  <label>Mandatory Luggage</label>-->
+<!--                  <div class="wrapper-checkbox d-flex gap-2 flex-wrap">-->
+<!--                    <div class="checkbox d-flex align-items-center gap-2 me-2" v-for="(luggage, index) in luggageStore.luggageAll" :key="index">-->
+<!--                      <input type="checkbox" :id="luggage.id" :value="luggage.id" v-model="mandatory_luggages">-->
+<!--                      <label class="mb-0" :for="luggage.id">{{luggage.name}}</label>-->
+<!--                    </div>-->
+<!--                  </div>-->
+<!--                  <p v-if="mandatoryLuggagesError" class="invalid-label">{{ mandatoryLuggagesError }}</p>-->
+<!--                </div>-->
+<!--              </div>-->
               <div class="col-12">
                 <div class="button-group d-flex gap-2">
                   <button type="submit" class="button-primary-small">Add New Service</button>
