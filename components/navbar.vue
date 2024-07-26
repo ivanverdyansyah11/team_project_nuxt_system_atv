@@ -13,10 +13,10 @@
       </button>
       <div class="collapse navbar-collapse d-lg-flex justify-content-lg-center w-100" id="navbarNavAltMarkup">
         <div class="navbar-nav">
-          <NuxtLink :to="{path: '/'}" class="nav-link mx-1">Home</NuxtLink>
-          <NuxtLink :to="{path: '/#about'}" class="nav-link mx-1">About</NuxtLink>
-          <NuxtLink :to="{path: '/homepage/package'}" class="nav-link mx-1">Package</NuxtLink>
-          <NuxtLink :to="{path: '/homepage/blog'}" class="nav-link mx-1">Blog</NuxtLink>
+          <NuxtLink :to="{path: '/homepage'}" class="nav-link mx-1" :class="{active: $route.path == '/homepage'}">Home</NuxtLink>
+          <NuxtLink :to="{path: '/homepage/service'}" class="nav-link mx-1" :class="{active: $route.path.startsWith('/homepage/service')}">Service</NuxtLink>
+          <NuxtLink :to="{path: '/homepage/package'}" class="nav-link mx-1" :class="{active: $route.path.startsWith('/homepage/package')}">Package</NuxtLink>
+          <NuxtLink :to="{path: '/homepage/blog'}" class="nav-link mx-1" :class="{active: $route.path.startsWith('/homepage/blog')}">Blog</NuxtLink>
         </div>
       </div>
       <button type="button" class="button-primary-small d-none d-lg-inline-block">Login Account</button>
