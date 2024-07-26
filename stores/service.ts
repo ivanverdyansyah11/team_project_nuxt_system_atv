@@ -61,6 +61,7 @@ export const useServiceStore = defineStore('service', {
                     },
                     body: JSON.stringify(createData)
                 });
+                console.log(response)
                 this.status_code = response?.status;
                 this.totalPages = response?.meta?.total;
             } catch (error) {
