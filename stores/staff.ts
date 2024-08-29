@@ -1,6 +1,6 @@
-import { defineStore } from 'pinia';
-import { apiUrl } from '~/helpers/Variable';
-import Cookies from "js-cookie";
+import {defineStore} from 'pinia'
+import {apiUrl} from '~/helpers/Variable'
+import Cookies from "js-cookie"
 
 export const useStaffStore = defineStore('staff', {
     state: () => ({
@@ -16,26 +16,47 @@ export const useStaffStore = defineStore('staff', {
         async getAllStaff() {
             try {
                 const token = useCookie('auth-token')
-                const response = await $fetch(`${ apiUrl }/staffs?current_page=${this.page}&page_size=${this.pageSize}&search=${this.keyword}`, {
+                const response = await $fetch(`${apiUrl}/staffs?current_page=${this.page}&page_size=${this.pageSize}&search=${this.keyword}`, {
                     method: 'GET',
                     headers: { 'Authorization': `Bearer ${token.value}` },
                 })
-                this.staffAll = response?.data ? response?.data : []
-                this.totalPages = response?.meta?.total
+                this.staffAll = response.data
+                this.totalPages = response.meta.total
             } catch (error) {
-                console.log(error?.message)
+                this.status_code = error.response.status || error.statusCode || error.code || 'Unknown error'
+                Cookies.set('alert-message', 'Failed to load data staff')
+                Cookies.set('alert-type', 'false')
+                Cookies.set('alert-page', 'Staff')
             }
         },
         async getStaffById(staffId: string) {
             try {
                 const token = useCookie('auth-token')
-                const response = await $fetch(`${ apiUrl }/staffs/${ staffId }`, {
+                const response = await $fetch(`${apiUrl}/staffs/${ staffId }`, {
                     method: 'GET',
                     headers: { 'Authorization': `Bearer ${token.value}` },
                 })
-                this.staff = response?.data ? response?.data : {}
+                this.staff = response.data
             } catch (error) {
-                console.log(error?.message)
+                this.status_code = error.response.status || error.statusCode || error.code || 'Unknown error'
+                Cookies.set('alert-message', 'Failed to load data staff')
+                Cookies.set('alert-type', 'false')
+                Cookies.set('alert-page', 'Staff')
+            }
+        },
+        async exportStaff() {
+            try {
+                const token = useCookie('auth-token')
+                const response = await $fetch(`${ apiUrl }/staffs/export/excel`, {
+                    method: 'GET',
+                    headers: { 'Authorization': `Bearer ${token.value}` },
+                })
+                return response
+            } catch (error) {
+                this.status_code = error.response.status || error.statusCode || error.code || 'Unknown error'
+                Cookies.set('alert-message', 'Failed to export data staff')
+                Cookies.set('alert-type', 'false')
+                Cookies.set('alert-page', 'Staff')
             }
         },
         async createStaff(createData: any) {
@@ -45,11 +66,14 @@ export const useStaffStore = defineStore('staff', {
                     method: 'POST',
                     headers: { 'Authorization': `Bearer ${token.value}` },
                     body: createData
-                });
-                this.status_code = response?.data ? 200 : null;
-                this.totalPages = response?.meta?.total
+                })
+                this.status_code = response.meta.code
+                this.totalPages = response.meta.total
             } catch (error) {
-                console.log(error?.message)
+                this.status_code = error.response.status || error.statusCode || error.code || 'Unknown error'
+                Cookies.set('alert-message', 'Failed to create new staff')
+                Cookies.set('alert-type', 'false')
+                Cookies.set('alert-page', 'Staff')
             }
         },
         async updateStaff(updateData: any, staffId: string) {
@@ -59,26 +83,30 @@ export const useStaffStore = defineStore('staff', {
                     method: 'PATCH',
                     headers: { 'Authorization': `Bearer ${token.value}` },
                     body: updateData
-                });
-                this.status_code = response?.data ? 200 : null;
+                })
+                this.status_code = response.meta.code
             } catch (error) {
-                console.log(error?.message)
+                this.status_code = error.response.status || error.statusCode || error.code || 'Unknown error'
+                Cookies.set('alert-message', 'Failed to update staff')
+                Cookies.set('alert-type', 'false')
+                Cookies.set('alert-page', 'Staff')
             }
         },
         async deleteStaff(staffId: number) {
-            try {
-                const token = useCookie('auth-token')
-                const response = await fetch(`${apiUrl}/staffs/${staffId}`, {
-                    method: 'DELETE',
-                    headers: { 'Authorization': `Bearer ${token.value}` },
-                })
-                this.status_code = response.status;
+            const token = useCookie('auth-token')
+            const response = await fetch(`${apiUrl}/staffs/${staffId}`, {
+                method: 'DELETE',
+                headers: { 'Authorization': `Bearer ${token.value}` },
+            })
+            this.status_code = response.status
+            if(this.status_code === 200) {
                 this.page = 1
-                this.totalPages = response?.meta?.total
-                await this.getAllStaff();
-            } catch (error) {
-                console.log(error?.message)
+                await this.getAllStaff()
+            } else {
+                Cookies.set('alert-message', 'Failed to delete staff')
+                Cookies.set('alert-type', 'false')
+                Cookies.set('alert-page', 'Staff')
             }
         },
     },
-});
+})
