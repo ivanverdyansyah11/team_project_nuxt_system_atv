@@ -1,46 +1,46 @@
 <script setup lang="ts">
-import { useServiceStore } from "~/stores/service";
-import { useCategoryStore } from "~/stores/category";
-import { useRouteStore } from "~/stores/route";
-import { useFacilityStore } from "~/stores/facility";
-import { useInstructorStore } from "~/stores/instructor";
-import { useLuggageStore } from "~/stores/luggage";
-import { useRoute } from '#app';
-import { ref, onMounted } from 'vue';
-import { formatRupiah } from "~/helpers/FormatRupiah";
+import { useServiceStore } from "~/stores/service"
+import { useCategoryStore } from "~/stores/category"
+import { useRouteStore } from "~/stores/route"
+import { useFacilityStore } from "~/stores/facility"
+import { useInstructorStore } from "~/stores/instructor"
+import { useLuggageStore } from "~/stores/luggage"
+import { useRoute } from '#app'
+import { ref, onMounted } from 'vue'
+import { formatRupiah } from "~/helpers/FormatRupiah"
 
 definePageMeta({
   title: 'Detail Service Page',
   layout: 'dashboard'
 })
 
-const serviceStore = useServiceStore();
-const categoryStore = useCategoryStore();
-const routeStore = useRouteStore();
-const facilityStore = useFacilityStore();
-const instructorStore = useInstructorStore();
-const luggageStore = useLuggageStore();
-const route = useRoute();
+const serviceStore = useServiceStore()
+const categoryStore = useCategoryStore()
+const routeStore = useRouteStore()
+const facilityStore = useFacilityStore()
+const instructorStore = useInstructorStore()
+const luggageStore = useLuggageStore()
+const route = useRoute()
 
-await serviceStore.getServiceById(route.params.id);
+await serviceStore.getServiceById(route.params.id)
 
-const routes = ref([]);
-const facilities = ref([]);
-const instructors = ref([]);
-const mandatory_luggages = ref([]);
+const routes = ref([])
+const facilities = ref([])
+const instructors = ref([])
+const mandatory_luggages = ref([])
 
 onMounted(async () => {
-  await categoryStore.getAllCategoryWithoutPaginate();
-  await routeStore.getAllRouteWithoutPaginate();
-  await facilityStore.getAllFacilityWithoutPaginate();
-  await instructorStore.getAllInstructorWithoutPaginate();
-  await luggageStore.getAllLuggageWithoutPaginate();
+  await categoryStore.getAllCategoryWithoutPaginate()
+  await routeStore.getAllRouteWithoutPaginate()
+  await facilityStore.getAllFacilityWithoutPaginate()
+  await instructorStore.getAllInstructorWithoutPaginate()
+  await luggageStore.getAllLuggageWithoutPaginate()
 
-  routes.value = serviceStore.service?.routes.map(r => r.route.id);
-  facilities.value = serviceStore.service?.facilities?.map(f => f.facility.id);
-  instructors.value = serviceStore.service?.instructors?.map(i => i.instructor.id);
-  mandatory_luggages.value = serviceStore.service?.mandatory_luggages?.map(m => m.mandatory_luggage.id);
-});
+  routes.value = serviceStore.service?.routes.map(r => r.route.id)
+  facilities.value = serviceStore.service?.facilities?.map(f => f.facility.id)
+  instructors.value = serviceStore.service?.instructors?.map(i => i.instructor.id)
+  mandatory_luggages.value = serviceStore.service?.mandatory_luggages?.map(m => m.mandatory_luggage.id)
+})
 </script>
 
 <template>
@@ -70,12 +70,19 @@ onMounted(async () => {
                          placeholder="Enter your price.." autocomplete="off" readonly :value="formatRupiah(serviceStore.service.price)">
                 </div>
               </div>
-              <div class="col-12">
+              <div class="col-md-6">
                 <div class="input-group d-flex flex-column">
                   <label for="entertainment_category_id">Entertainment Category</label>
                   <select class="input w-100" name="entertainment_category_id" id="entertainment_category_id" v-model="serviceStore.service.entertainment_category.id" disabled>
                     <option v-for="(category, index) in categoryStore.categoryAll" :key="index" :value="category.id">{{category.name}}</option>
                   </select>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="input-group d-flex flex-column">
+                  <label for="duration">Duration</label>
+                  <input type="number" class="input w-100" name="duration" id="duration"
+                         placeholder="Enter your duration.." autocomplete="off" readonly :value="serviceStore.service.duration">
                 </div>
               </div>
               <div class="col-md-6">
@@ -120,6 +127,13 @@ onMounted(async () => {
                       <label class="mb-0" :for="luggage.id">{{luggage.name}}</label>
                     </div>
                   </div>
+                </div>
+              </div>
+              <div class="col-12">
+                <div class="input-group d-flex flex-column">
+                  <label for="description">Description</label>
+                  <textarea class="input w-100" name="description" id="description"
+                            placeholder="Enter your description.." autocomplete="off" :value="serviceStore.service.description" rows="4" readonly></textarea>
                 </div>
               </div>
               <div class="col-12">
