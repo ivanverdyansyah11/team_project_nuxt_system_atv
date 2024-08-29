@@ -37,7 +37,8 @@ const logout = async (event: any) => {
           <div class="profile-menu-list">
             <div class="list-menu d-flex align-items-center gap-2">
               <NuxtLink :to="{path: '/homepage/profile'}" class="menu-item" :class="{ active: $route.path == '/homepage/profile' || $route.path == '/homepage/profile/edit' }">Profile Data</NuxtLink>
-              <NuxtLink :to="{path: '/homepage/profile/history-booking'}" class="menu-item" :class="{ active: $route.path.startsWith('/homepage/profile/history-booking') }">History Booking</NuxtLink>
+              <NuxtLink :to="{path: '/homepage/profile/history-booking/service'}" class="menu-item" :class="{ active: $route.path.startsWith('/homepage/profile/history-booking/service') }">History Booking Service</NuxtLink>
+              <NuxtLink :to="{path: '/homepage/profile/history-booking/package'}" class="menu-item" :class="{ active: $route.path.startsWith('/homepage/profile/history-booking/package') }">History Booking Package</NuxtLink>
             </div>
           </div>
           <div class="profile-menu-data mt-3">
