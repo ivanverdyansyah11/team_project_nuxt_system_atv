@@ -1,8 +1,9 @@
 <script setup lang="ts">
-import { useLuggageStore } from "~/stores/luggage";
+import {useLuggageStore} from "~/stores/luggage"
+import {ref, onMounted} from 'vue'
+import {useField, useForm} from 'vee-validate'
+import {getAlert, alertMessage, alertType, alertPage} from "~/helpers/Alert"
 import Cookies from 'js-cookie'
-import { ref, onMounted } from 'vue'
-import { useField, useForm } from 'vee-validate'
 import * as yup from 'yup'
 
 definePageMeta({
@@ -13,20 +14,20 @@ definePageMeta({
 const keyword = ref('')
 const luggageStore = useLuggageStore()
 let luggageLength = ref(0)
-const luggageData = ref(null);
+const luggageData = ref(null)
 const totalPages = ref(0)
-let alertMessage = useCookie('alert-message')
-let alertPage = useCookie('alert-page')
+const dynamicPath = ref('')
+const linkRef = ref<HTMLAnchorElement | null>(null)
 
 const schema = yup.object({
   name: yup.string().required('Name is required'),
-});
+})
 
 const { handleSubmit, resetForm, setValues } = useForm({
   validationSchema: schema,
-});
+})
 
-const { value: name, errorMessage: nameError } = useField('name');
+const { value: name, errorMessage: nameError } = useField('name')
 
 const search = async (event: any) => {
   event.preventDefault()
@@ -43,92 +44,106 @@ const changePage = async (page: number) => {
   luggageLength.value = luggageStore.luggageAll.length
 }
 
-const createLuggage = handleSubmit( async (values) => {
-  await luggageStore.createLuggage(values);
-  if (luggageStore.status_code === 200) {
-    Cookies.set('alert-message', 'Successfully create new luggage');
-    Cookies.set('alert-page', 'Luggage');
-    alertMessage = useCookie('alert-message')
-    alertPage = useCookie('alert-page')
-    setValues({
-      name: '',
-    });
-    await luggageStore.getAllLuggage()
-    totalPages.value = Math.ceil(luggageStore.totalPages / luggageStore.pageSize)
-    luggageLength.value = luggageStore.luggageAll.length
-  }
-});
+const exportLuggage = async () => {
+  const blob = await luggageStore.exportLuggage()
+  const url = URL.createObjectURL(blob)
+  dynamicPath.value = url
+}
+
+const removeInputValues = () => {
+  setValues({
+    name: '',
+  })
+}
 
 const removeLuggageDetail = async () => {
   luggageData.value = null
-  setValues({
-    name: '',
-  });
+  removeInputValues()
 }
 
 const luggageDetail = async (luggageSelect: any) => {
-  await luggageStore.getLuggageById(luggageSelect.id);
+  await luggageStore.getLuggageById(luggageSelect.id)
   luggageData.value = luggageSelect
-  const luggage = luggageStore.luggage;
+  const luggage = luggageStore.luggage
   setValues({
     name: luggage.name,
-  });
+  })
 }
 
-const updateLuggage = handleSubmit( async (values) => {
-  await luggageStore.updateLuggage(values, luggageData.value.id);
-  if (luggageStore.status_code === 200) {
-    Cookies.set('alert-message', 'Successfully update luggage');
-    Cookies.set('alert-page', 'Luggage');
-    alertMessage = useCookie('alert-message')
-    alertPage = useCookie('alert-page')
-    setValues({
-      name: '',
-    });
-    luggageData.value = null;
+const createLuggage = handleSubmit( async (values) => {
+  await luggageStore.createLuggage(values)
+  if (luggageStore.status_code === 201) {
+    Cookies.set('alert-message', 'Successfully create new luggage')
+    Cookies.set('alert-type', 'true')
+    Cookies.set('alert-page', 'Luggage')
+    getAlert()
+    removeInputValues()
     await luggageStore.getAllLuggage()
+    totalPages.value = Math.ceil(luggageStore.totalPages / luggageStore.pageSize)
+    luggageLength.value = luggageStore.luggageAll.length
+  } else {
+    getAlert()
   }
-});
+})
+
+const updateLuggage = handleSubmit( async (values) => {
+  await luggageStore.updateLuggage(values, luggageData.value.id)
+  if (luggageStore.status_code === 200) {
+    Cookies.set('alert-message', 'Successfully update luggage')
+    Cookies.set('alert-type', 'true')
+    Cookies.set('alert-page', 'Luggage')
+    getAlert()
+    removeInputValues()
+    luggageData.value = null
+    await luggageStore.getAllLuggage()
+  } else {
+    getAlert()
+  }
+})
 
 const confirmDeleteLuggage = async () => {
   if (luggageData.value) {
-    await luggageStore.deleteLuggage(luggageData.value.id);
+    await luggageStore.deleteLuggage(luggageData.value.id)
     if (luggageStore.status_code === 200) {
-      Cookies.set('alert-message', 'Successfully deleted luggage');
-      Cookies.set('alert-page', 'Luggage');
-      alertMessage = useCookie('alert-message')
-      alertPage = useCookie('alert-page')
+      Cookies.set('alert-message', 'Successfully deleted luggage')
+      Cookies.set('alert-page', 'Luggage')
+      getAlert()
     }
-    luggageData.value = null;
-    totalPages.value = Math.ceil(luggageStore.totalPages / luggageStore.pageSize)
+    luggageData.value = null
     luggageLength.value = luggageStore.luggageAll.length
+    totalPages.value = Math.ceil(luggageLength.value / luggageStore.pageSize)
+  } else {
+    getAlert()
   }
-};
+}
 
 onMounted(async () => {
   await luggageStore.getAllLuggage()
+  await exportLuggage()
   luggageLength.value = luggageStore.luggageAll.length
   totalPages.value = Math.ceil(luggageStore.totalPages / luggageStore.pageSize)
 })
 
 onBeforeRouteLeave((to, from, next) => {
-  Cookies.remove('alert-message');
-  Cookies.remove('alert-page');
-  next();
-});
+  Cookies.remove('alert-message')
+  Cookies.remove('alert-type')
+  Cookies.remove('alert-page')
+  next()
+})
 
 onBeforeRouteUpdate((to, from, next) => {
-  Cookies.remove('alert-message');
-  Cookies.remove('alert-page');
-  next();
-});
+  Cookies.remove('alert-message')
+  Cookies.remove('alert-type')
+  Cookies.remove('alert-page')
+  next()
+})
 </script>
 
 <template>
   <div class="content container mt-4">
     <div class="row">
       <div class="col-12">
-        <div v-if="alertPage == 'Luggage'" class="alert alert-success w-100" role="alert">
+        <div v-if="alertPage == 'Luggage'" class="alert w-100" :class="alertType != false ? 'alert-success' : 'alert-danger'" role="alert">
           {{ alertMessage }}
         </div>
       </div>
@@ -142,6 +157,7 @@ onBeforeRouteUpdate((to, from, next) => {
             <button type="button" class="button-primary-small d-none d-md-inline-block" data-bs-toggle="modal" data-bs-target="#createModal">Add
               New
               Luggage</button>
+            <NuxtLink :to="dynamicPath" ref="linkRef" download class="button-reverse">Export Excel</NuxtLink>
           </div>
           <div class="wrapper-table mt-4">
             <table class="table" style="width:100%">
