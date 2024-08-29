@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import {useBookingStore} from "~/stores/booking"
+import {useBookingServiceStore} from "~/stores/bookingService"
 import {useCustomerStore} from "~/stores/customer"
 import {useServiceStore} from "~/stores/service"
 import { useField, useForm } from 'vee-validate'
@@ -7,12 +7,13 @@ import {navigateTo} from "nuxt/app"
 import {onMounted, ref} from 'vue'
 import {useRoute} from '#app'
 import * as yup from 'yup'
+import Cookies from "js-cookie"
 
 definePageMeta({
   layout: 'homepage'
 })
 
-const bookingStore = useBookingStore()
+const bookingServiceStore = useBookingServiceStore()
 const customerStore = useCustomerStore()
 const serviceStore = useServiceStore()
 const route = useRoute()
@@ -93,8 +94,10 @@ const create = handleSubmit(async (values) => {
   delete values.entertainment_service_id
   delete values.qty
   try {
-    await bookingStore.createBookingService(values)
-    if(bookingStore.status_code === 201) {
+    const bookingId = await bookingServiceStore.createBookingService(values)
+    if(bookingServiceStore.status_code === 201) {
+      Cookies.set('booking-id', bookingId)
+      Cookies.set('booking-type', 'service')
       navigateTo('/homepage/booking/success')
     }
   } catch (error) {
