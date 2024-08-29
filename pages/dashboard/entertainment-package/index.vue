@@ -1,7 +1,10 @@
 <script setup lang="ts">
-import { useBundleStore } from "~/stores/bundle";
-import { ref, onMounted } from 'vue'
-import { formatRupiah } from "~/helpers/FormatRupiah";
+import {useBundleStore} from "~/stores/bundle"
+import {useAuthStore} from "~/stores/auth"
+import {ref, onMounted} from 'vue'
+import {formatRupiah} from "~/helpers/FormatRupiah"
+import {formatDate} from "~/helpers/FormatDate"
+import {getAlert, alertMessage, alertType, alertPage} from "~/helpers/Alert"
 import Cookies from 'js-cookie'
 
 definePageMeta({
@@ -11,11 +14,12 @@ definePageMeta({
 
 const keyword = ref('')
 const bundleStore = useBundleStore()
+const authStore = useAuthStore()
 let packageLength = ref(0)
-const packageDelete = ref(null);
+const packageDelete = ref(null)
 const totalPages = ref(0)
-let alertMessage = useCookie('alert-message')
-let alertPage = useCookie('alert-page')
+const dynamicPath = ref('')
+const linkRef = ref<HTMLAnchorElement | null>(null)
 
 const search = async (event: any) => {
   event.preventDefault()
@@ -31,45 +35,57 @@ const changePage = async (page: number) => {
   packageLength.value = bundleStore.bundleAll.length
 }
 
+const exportPackage = async () => {
+  const blob = await bundleStore.exportBundle()
+  const url = URL.createObjectURL(blob)
+  dynamicPath.value = url
+}
+
 const confirmDeletePackage = async () => {
   if (packageDelete.value) {
-    await bundleStore.deleteBundle(packageDelete.value.id);
+    await bundleStore.deleteBundle(packageDelete.value.id)
     if (bundleStore.status_code === 200) {
-      Cookies.set('alert-message', 'Successfully deleted package');
-      Cookies.set('alert-page', 'Package');
-      alertMessage = useCookie('alert-message')
-      alertPage = useCookie('alert-page')
+      Cookies.set('alert-message', 'Successfully deleted entertainment package')
+      Cookies.set('alert-type', 'true')
+      Cookies.set('alert-page', 'Package')
+      getAlert()
     }
-    packageDelete.value = null;
-    totalPages.value = Math.ceil(bundleStore.totalPages / bundleStore.pageSize)
+    packageDelete.value = null
     packageLength.value = bundleStore.bundleAll.length
+    totalPages.value = Math.ceil(packageLength.value / bundleStore.pageSize)
+  } else {
+    getAlert()
   }
-};
+}
 
 onMounted(async () => {
   await bundleStore.getAllBundle()
+  await exportPackage()
   packageLength.value = bundleStore.bundleAll.length
   totalPages.value = Math.ceil(bundleStore.totalPages / bundleStore.pageSize)
+  getAlert()
 })
 
 onBeforeRouteLeave((to, from, next) => {
-  Cookies.remove('alert-message');
-  Cookies.remove('alert-page');
-  next();
-});
+  Cookies.remove('alert-message')
+  Cookies.remove('alert-type')
+  Cookies.remove('alert-page')
+  next()
+})
 
 onBeforeRouteUpdate((to, from, next) => {
-  Cookies.remove('alert-message');
-  Cookies.remove('alert-page');
-  next();
-});
+  Cookies.remove('alert-message')
+  Cookies.remove('alert-type')
+  Cookies.remove('alert-page')
+  next()
+})
 </script>
 
 <template>
   <div class="content container mt-4">
     <div class="row">
       <div class="col-12">
-        <div v-if="alertPage == 'Package'" class="alert alert-success w-100" role="alert">
+        <div v-if="alertPage == 'Package'" class="alert w-100" :class="alertType != false ? 'alert-success' : 'alert-danger'" role="alert">
           {{ alertMessage }}
         </div>
       </div>
@@ -80,9 +96,10 @@ onBeforeRouteUpdate((to, from, next) => {
               <input type="search" class="input w-100" id="search" placeholder="Search package.."
                      autocomplete="off" v-model="keyword" @keyup="search">
             </form>
-            <NuxtLink :to="{path: `/dashboard/entertainment-package/create`}" class="button-primary-small d-none d-md-inline-block">Add
+            <NuxtLink v-if="authStore.user.user.role == 'admin'" :to="{path: `/dashboard/entertainment-package/create`}" class="button-primary-small d-none d-md-inline-block">Add
               New
               Package</NuxtLink>
+            <NuxtLink :to="dynamicPath" ref="linkRef" download class="button-reverse">Export Excel</NuxtLink>
           </div>
           <div class="wrapper-table mt-4">
             <table class="table" style="width:100%">
@@ -90,7 +107,8 @@ onBeforeRouteUpdate((to, from, next) => {
               <tr>
                 <th>Name</th>
                 <th>Price</th>
-                <th>Description</th>
+                <th>Duration</th>
+                <th>Expired Date</th>
                 <th style="width: 200px;"></th>
               </tr>
               </thead>
@@ -98,17 +116,18 @@ onBeforeRouteUpdate((to, from, next) => {
               <tr v-if="packageLength > 0" v-for="(bundle, index) in bundleStore.bundleAll" :key="index">
                 <td>{{bundle.name}}</td>
                 <td>{{formatRupiah(bundle.price)}}</td>
-                <td>{{bundle.description}}</td>
+                <td>{{bundle.duration}} Minutes</td>
+                <td>{{formatDate(bundle.expired_at)}}</td>
                 <td class="d-flex justify-content-end gap-1 table-mobile" style="width: 200px;">
                   <NuxtLink :to="{path: `/dashboard/entertainment-package/${bundle.id}`}"
                             class="wrapper-icon icon-detail d-flex align-items-center justify-content-center">
                     <i class="fa-solid fa-eye" style="font-size: 0.85rem;"></i>
                   </NuxtLink>
-                  <NuxtLink :to="{path: `/dashboard/entertainment-package/edit/${bundle.id}`}"
+                  <NuxtLink v-if="authStore.user.user.role == 'admin'" :to="{path: `/dashboard/entertainment-package/edit/${bundle.id}`}"
                             class="wrapper-icon icon-edit d-flex align-items-center justify-content-center">
                     <i class="fa-solid fa-pen-to-square" style="font-size: 0.85rem;"></i>
                   </NuxtLink>
-                  <button type="button"
+                  <button v-if="authStore.user.user.role == 'admin'" type="button"
                           class="wrapper-icon icon-delete d-flex align-items-center justify-content-center"
                           data-bs-toggle="modal" data-bs-target="#deleteModal" @click="packageDelete = bundle">
                     <i class="fa-solid fa-trash-can" style="font-size: 0.85rem;"></i>
@@ -116,7 +135,7 @@ onBeforeRouteUpdate((to, from, next) => {
                 </td>
               </tr>
               <tr v-else>
-                <td colspan="4">Data package not found!</td>
+                <td colspan="5">Data package not found!</td>
               </tr>
               </tbody>
             </table>
