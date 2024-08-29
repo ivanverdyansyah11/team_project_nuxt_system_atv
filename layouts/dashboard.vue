@@ -1,3 +1,6 @@
+<script setup lang="ts">
+</script>
+
 <template>
   <div>
     <Sidebar />
@@ -11,3 +14,6 @@
     </main>
   </div>
 </template>
+
+<style scoped>
+</style>
