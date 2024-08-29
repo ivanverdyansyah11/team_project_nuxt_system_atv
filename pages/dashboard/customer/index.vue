@@ -1,9 +1,10 @@
 <script setup lang="ts">
-import { useCustomerStore } from "~/stores/customer";
-import { ref, onMounted } from 'vue'
-import { useField, useForm } from "vee-validate";
+import {useCustomerStore} from "~/stores/customer"
+import {ref, onMounted} from 'vue'
+import {useField, useForm} from "vee-validate"
+import {getAlert, alertMessage, alertType, alertPage} from "~/helpers/Alert"
 import Cookies from 'js-cookie'
-import * as yup from "yup";
+import * as yup from "yup"
 
 definePageMeta({
   title: 'Customer Page',
@@ -12,26 +13,26 @@ definePageMeta({
 
 const keyword = ref('')
 const customerStore = useCustomerStore()
-const customerData = ref(null);
+const customerData = ref(null)
 let customerLength = ref(0)
 const totalPages = ref(0)
-let alertMessage = useCookie('alert-message')
-let alertPage = useCookie('alert-page')
+const dynamicPath = ref('')
+const linkRef = ref<HTMLAnchorElement | null>(null)
 
 const schema = yup.object({
   name: yup.string().required('Name is required'),
   username: yup.string().required('Username is required'),
   email: yup.string().email().required('Email is required'),
   password: yup.string().required('Password is required'),
-});
+})
 
-const { handleSubmit, resetForm, setValues } = useForm({
+const { setValues } = useForm({
   validationSchema: schema,
-});
+})
 
-const { value: name, errorMessage: nameError } = useField('name');
-const { value: username, errorMessage: usernameError } = useField('username');
-const { value: email, errorMessage: emailError } = useField('email');
+const { value: name, errorMessage: nameError } = useField('name')
+const { value: username, errorMessage: usernameError } = useField('username')
+const { value: email, errorMessage: emailError } = useField('email')
 
 const search = async (event: any) => {
   event.preventDefault()
@@ -48,50 +49,63 @@ const changePage = async (page: number) => {
   customerLength.value = customerStore.customerAll.length
 }
 
-const removeCustomerDetail = async () => {
-  customerData.value = null
+const exportCustomer = async () => {
+  const blob = await customerStore.exportCustomer()
+  const url = URL.createObjectURL(blob)
+  dynamicPath.value = url
+}
+
+const removeInputValues = () => {
   setValues({
     name: '',
     username: '',
     email: '',
-  });
+  })
+}
+
+const removeCustomerDetail = async () => {
+  customerData.value = null
+  removeInputValues()
 }
 
 const customerDetail = async (customerSelect: any) => {
-  await customerStore.getCustomerById(customerSelect.id);
+  await customerStore.getCustomerById(customerSelect.id)
   customerData.value = customerSelect
-  const customer = customerStore.customer;
+  const customer = customerStore.customer
   setValues({
     name: customer.name,
     username: customer.user.username,
     email: customer.user.email,
-  });
+  })
 }
 
 onMounted(async () => {
   await customerStore.getAllCustomer()
+  await exportCustomer()
   customerLength.value = customerStore.customerAll.length
   totalPages.value = Math.ceil(customerStore.totalPages / customerStore.pageSize)
 })
 
 onBeforeRouteLeave((to, from, next) => {
-  Cookies.remove('alert-message');
-  Cookies.remove('alert-page');
-  next();
-});
+  Cookies.remove('alert-message')
+  Cookies.remove('alert-type')
+  Cookies.remove('alert-page')
+  next()
+})
 
 onBeforeRouteUpdate((to, from, next) => {
-  Cookies.remove('alert-message');
-  Cookies.remove('alert-page');
-  next();
-});
+  Cookies.remove('alert-message')
+  Cookies.remove('alert-type')
+  Cookies.remove('alert-page')
+  next()
+})
 </script>
 
 <template>
   <div class="content container mt-4">
     <div class="row">
       <div class="col-12">
-        <div v-if="alertPage == 'Customer'" class="alert alert-success w-100" role="alert">
+        <div v-if="alertPage == 'Customer'" class="alert w-100" :class="alertType != false ? 'alert-success' : 'alert-danger'" role="alert">
           {{ alertMessage }}
         </div>
       </div>
@@ -102,6 +116,7 @@ onBeforeRouteUpdate((to, from, next) => {
               <input type="search" class="input w-100" id="search" placeholder="Search customer.."
                      autocomplete="off" v-model="keyword" @keyup="search">
             </form>
+            <NuxtLink :to="dynamicPath" ref="linkRef" download class="button-reverse">Export Excel</NuxtLink>
           </div>
           <div class="wrapper-table mt-4">
             <table class="table" style="width:100%">
