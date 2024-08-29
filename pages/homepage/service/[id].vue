@@ -1,14 +1,17 @@
 <script setup lang="ts">
-import {useServiceStore} from "~/stores/service";
-import {useRoute} from '#app';
+import {useServiceStore} from "~/stores/service"
+import {useAuthStore} from '~/stores/auth'
+import {useRoute} from '#app'
 import {formatRupiah} from '~/helpers/FormatRupiah'
+import imageNotFound from '~/assets/image/other/image-not-found.svg'
 
 definePageMeta({
   layout: 'homepage'
 })
 
 const serviceStore = useServiceStore()
-const route = useRoute();
+const authStore = useAuthStore()
+const route = useRoute()
 await serviceStore.getServiceById(route.params.id)
 </script>
 
@@ -20,16 +23,16 @@ await serviceStore.getServiceById(route.params.id)
         <div class="wrapper-banner position-relative">
           <img src="~/assets/image/other/other-top.svg" alt="Other Top Image">
           <img src="~/assets/image/other/other-bottom.svg" alt="Bottom Top Image">
-          <img :src="serviceStore.service.image_path != null ? `http://localhost:8000/${serviceStore.service.image_path}` : 'https://placehold.co/600x400?text=Image+Not+Found'" alt="Banner Image" class="img-fluid position-relative banner-image">
+          <img :src="serviceStore.service.image_path != null ? `http://localhost:8000/${serviceStore.service.image_path}` : imageNotFound" alt="Banner Image" class="img-fluid position-relative banner-image">
         </div>
       </div>
       <div class="offset-lg-1 col-lg-6">
         <p class="subtitle mb-2">{{serviceStore.service.entertainment_category.name}}</p>
-        <h2 class="title">{{serviceStore.service.name}}</h2>
+        <h2 class="title mb-2">{{serviceStore.service.name}}</h2>
         <p class="description">{{serviceStore.service.description}}</p>
         <div class="button-group d-flex gap-2 align-items-center">
           <NuxtLink to="#detail" class="button-primary-small">Learn More</NuxtLink>
-          <NuxtLink :to="{path: `/homepage/booking/service/${serviceStore.service.id}`}" class="button-reverse">Booking Now</NuxtLink>
+          <NuxtLink v-if="authStore.isLoggedIn && authStore.user.user.role != 'instructor'" :to="{path: `/homepage/booking/service/${serviceStore.service.id}`}" class="button-reverse">Booking Now</NuxtLink>
         </div>
       </div>
     </div>
@@ -79,7 +82,7 @@ await serviceStore.getServiceById(route.params.id)
           </p>
           <p class="d-flex gap-2 align-items-center">
             <i class="fa-solid fa-square-check"></i>
-            120 minutes
+            {{serviceStore.service.duration}} minutes
           </p>
         </div>
       </div>
