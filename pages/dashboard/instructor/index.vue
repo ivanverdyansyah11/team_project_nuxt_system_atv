@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import { useInstructorStore } from "~/stores/instructor";
-import { ref, onMounted } from 'vue'
-import { useField, useForm } from 'vee-validate'
+import {useInstructorStore} from "~/stores/instructor";
+import {ref, onMounted} from 'vue'
+import {useField, useForm} from 'vee-validate'
+import {getAlert, alertMessage, alertType, alertPage} from "~/helpers/Alert"
 import Cookies from 'js-cookie'
 import * as yup from 'yup'
 
@@ -13,28 +14,29 @@ definePageMeta({
 const keyword = ref('')
 const instructorStore = useInstructorStore()
 let instructorLength = ref(0)
-const instructorData = ref(null);
+const instructorData = ref(null)
 const totalPages = ref(0)
-let alertMessage = useCookie('alert-message')
-let alertPage = useCookie('alert-page')
+const dynamicPath = ref('')
+const linkRef = ref<HTMLAnchorElement | null>(null)
+const passwordErrorRequired = ref()
 
 const schema = yup.object({
   name: yup.string().required('Name is required'),
   employee_code: yup.string().required('Employee code is required'),
   username: yup.string().required('Username is required'),
   email: yup.string().email().required('Email is required'),
-  password: yup.string(),
-});
+  password: yup.string().min(6, 'Password must be at least 6 characters').notRequired(),
+})
 
-const { handleSubmit, resetForm, setValues } = useForm({
+const { handleSubmit, setValues } = useForm({
   validationSchema: schema,
-});
+})
 
-const { value: name, errorMessage: nameError } = useField('name');
-const { value: employee_code, errorMessage: employeeCodeError } = useField('employee_code');
-const { value: username, errorMessage: usernameError } = useField('username');
-const { value: email, errorMessage: emailError } = useField('email');
-const { value: password, errorMessage: passwordError } = useField('password');
+const { value: name, errorMessage: nameError } = useField('name')
+const { value: employee_code, errorMessage: employeeCodeError } = useField('employee_code')
+const { value: username, errorMessage: usernameError } = useField('username')
+const { value: email, errorMessage: emailError } = useField('email')
+const { value: password, errorMessage: passwordError } = useField('password')
 
 const search = async (event: any) => {
   event.preventDefault()
@@ -51,97 +53,109 @@ const changePage = async (page: number) => {
   instructorLength.value = instructorStore.instructorAll.length
 }
 
-const createInstructor = handleSubmit( async (values) => {
-  await instructorStore.createInstructor(values);
-  if (instructorStore.status_code === 200) {
-    Cookies.set('alert-message', 'Successfully create new instructor');
-    Cookies.set('alert-page', 'Instructor');
-    alertMessage = useCookie('alert-message')
-    alertPage = useCookie('alert-page')
-    setValues({
-      name: '',
-      employee_code: '',
-      username: '',
-      email: '',
-      password: '',
-    });
-    await instructorStore.getAllInstructor()
-    totalPages.value = Math.ceil(instructorStore.totalPages / instructorStore.pageSize)
-    instructorLength.value = instructorStore.instructorAll.length
-  }
-});
+const exportInstructor = async () => {
+  const blob = await instructorStore.exportInstructor()
+  const url = URL.createObjectURL(blob)
+  dynamicPath.value = url
+}
 
-const removeInstructorDetail = async () => {
-  instructorData.value = null
+const instructorDetail = async (instructorSelect: any) => {
+  await instructorStore.getInstructorById(instructorSelect.id)
+  instructorData.value = instructorSelect
+  const instructor = instructorStore.instructor
+  setValues({
+    name: instructor.name,
+    employee_code: instructor.employee_code,
+    username: instructor.user.username,
+    email: instructor.user.email,
+  })
+}
+
+const removeInputValues = () => {
   setValues({
     name: '',
     employee_code: '',
     username: '',
     email: '',
     password: '',
-  });
+  })
 }
 
-const instructorDetail = async (instructorSelect: any) => {
-  await instructorStore.getInstructorById(instructorSelect.id);
-  instructorData.value = instructorSelect
-  const instructor = instructorStore.instructor;
-  setValues({
-    name: instructor.name,
-    employee_code: instructor.employee_code,
-    username: instructor.user.username,
-    email: instructor.user.email,
-  });
+const removeInstructorDetail = async () => {
+  instructorData.value = null
+  removeInputValues()
 }
+
+const createInstructor = handleSubmit( async (values) => {
+  if (values.password != undefined) {
+    await instructorStore.createInstructor(values)
+    if (instructorStore.status_code === 201) {
+      Cookies.set('alert-message', 'Successfully create new instructor')
+      Cookies.set('alert-type', 'true')
+      Cookies.set('alert-page', 'Instructor')
+      getAlert()
+      removeInputValues()
+      await instructorStore.getAllInstructor()
+      totalPages.value = Math.ceil(instructorStore.totalPages / instructorStore.pageSize)
+      instructorLength.value = instructorStore.instructorAll.length
+    } else {
+      getAlert()
+    }
+  } else {
+    passwordErrorRequired.value = 'Password is required'
+  }
+})
 
 const updateInstructor = handleSubmit( async (values) => {
-  await instructorStore.updateInstructor(values, instructorData.value.id);
+  await instructorStore.updateInstructor(values, instructorData.value.id)
   if (instructorStore.status_code === 200) {
-    Cookies.set('alert-message', 'Successfully update instructor');
-    Cookies.set('alert-page', 'Instructor');
-    alertMessage = useCookie('alert-message')
-    alertPage = useCookie('alert-page')
-    setValues({
-      name: '',
-      employee_code: '',
-      username: '',
-      email: '',
-    });
-    instructorData.value = null;
+    Cookies.set('alert-message', 'Successfully update instructor')
+    Cookies.set('alert-type', 'true')
+    Cookies.set('alert-page', 'Instructor')
+    getAlert()
+    removeInputValues()
+    instructorData.value = null
     await instructorStore.getAllInstructor()
+  } else {
+    getAlert()
   }
-});
+})
 
 const confirmDeleteInstructor = async () => {
   if (instructorData.value) {
-    await instructorStore.deleteInstructor(instructorData.value.id);
+    await instructorStore.deleteInstructor(instructorData.value.id)
     if (instructorStore.status_code === 200) {
-      Cookies.set('alert-message', 'Successfully deleted instructor');
-      Cookies.set('alert-page', 'Instructor');
-      alertMessage = useCookie('alert-message')
-      alertPage = useCookie('alert-page')
+      Cookies.set('alert-message', 'Successfully deleted instructor')
+      Cookies.set('alert-type', 'true')
+      Cookies.set('alert-page', 'Instructor')
+      getAlert()
     }
-    instructorData.value = null;
-    totalPages.value = Math.ceil(instructorStore.totalPages / instructorStore.pageSize)
+    instructorData.value = null
     instructorLength.value = instructorStore.instructorAll.length
+    totalPages.value = Math.ceil(instructorLength.value / instructorStore.pageSize)
+  } else {
+    getAlert()
   }
-};
+}
 
 onMounted(async () => {
   await instructorStore.getAllInstructor()
+  await exportInstructor()
   instructorLength.value = instructorStore.instructorAll.length
   totalPages.value = Math.ceil(instructorStore.totalPages / instructorStore.pageSize)
 })
 
 onBeforeRouteLeave((to, from, next) => {
-  Cookies.remove('alert-message');
-  Cookies.remove('alert-page');
-  next();
-});
+  Cookies.remove('alert-message')
+  Cookies.remove('alert-type')
+  Cookies.remove('alert-page')
+  next()
+})
 
 onBeforeRouteUpdate((to, from, next) => {
-  Cookies.remove('alert-message');
-  Cookies.remove('alert-page');
+  Cookies.remove('alert-message')
+  Cookies.remove('alert-type')
+  Cookies.remove('alert-page')
   next();
 });
 </script>
@@ -150,7 +164,7 @@ onBeforeRouteUpdate((to, from, next) => {
   <div class="content container mt-4">
     <div class="row">
       <div class="col-12">
-        <div v-if="alertPage == 'Instructor'" class="alert alert-success w-100" role="alert">
+        <div v-if="alertPage == 'Instructor'" class="alert w-100" :class="alertType != false ? 'alert-success' : 'alert-danger'" role="alert">
           {{ alertMessage }}
         </div>
       </div>
@@ -164,6 +178,7 @@ onBeforeRouteUpdate((to, from, next) => {
             <button type="button" class="button-primary-small d-none d-md-inline-block" data-bs-toggle="modal" data-bs-target="#createModal">Add
               New
               Instructor</button>
+            <NuxtLink :to="dynamicPath" ref="linkRef" download class="button-reverse">Export Excel</NuxtLink>
           </div>
           <div class="wrapper-table mt-4">
             <table class="table" style="width:100%">
@@ -320,7 +335,7 @@ onBeforeRouteUpdate((to, from, next) => {
                     <label for="password">Password</label>
                     <input type="password" class="input w-100" name="password" id="password"
                            placeholder="Enter your password.." autocomplete="off" v-model="password">
-                    <p v-if="passwordError" class="invalid-label">{{ passwordError }}</p>
+                    <p v-if="passwordError || passwordErrorRequired" class="invalid-label">{{ passwordError || passwordErrorRequired }}</p>
                   </div>
                 </div>
               </div>
