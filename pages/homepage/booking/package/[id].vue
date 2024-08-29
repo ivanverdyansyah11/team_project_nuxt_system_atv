@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import {useBookingStore} from "~/stores/booking"
+import {useBookingPackageStore} from "~/stores/bookingPackage"
 import {useCustomerStore} from "~/stores/customer"
 import {useBundleStore} from "~/stores/bundle"
 import { useField, useForm } from 'vee-validate'
@@ -7,12 +7,13 @@ import {navigateTo} from "nuxt/app"
 import {onMounted, ref} from 'vue'
 import {useRoute} from '#app'
 import * as yup from 'yup'
+import Cookies from "js-cookie";
 
 definePageMeta({
   layout: 'homepage'
 })
 
-const bookingStore = useBookingStore()
+const bookingPackageStore = useBookingPackageStore()
 const customerStore = useCustomerStore()
 const bundleStore = useBundleStore()
 const route = useRoute()
@@ -85,8 +86,10 @@ const create = handleSubmit(async (values) => {
   values.date = new Date(values.date).toISOString()
   delete values.qty
   try {
-    await bookingStore.createBookingPackage(values)
-    if(bookingStore.status_code === 201) {
+    const bookingId = await bookingPackageStore.createBookingPackage(values)
+    if(bookingPackageStore.status_code === 201) {
+      Cookies.set('booking-id', bookingId)
+      Cookies.set('booking-type', 'package')
       navigateTo('/homepage/booking/success')
     }
   } catch (error) {
