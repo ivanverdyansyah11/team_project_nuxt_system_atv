@@ -1,7 +1,9 @@
 <script setup lang="ts">
-import { useServiceStore } from "~/stores/service";
-import { ref, onMounted } from 'vue'
-import { formatRupiah } from "~/helpers/FormatRupiah";
+import {useServiceStore} from "~/stores/service"
+import {useAuthStore} from "~/stores/auth"
+import {ref, onMounted} from 'vue'
+import {formatRupiah} from "~/helpers/FormatRupiah"
+import {getAlert, alertMessage, alertType, alertPage} from "~/helpers/Alert"
 import Cookies from 'js-cookie'
 
 definePageMeta({
@@ -11,11 +13,12 @@ definePageMeta({
 
 const keyword = ref('')
 const serviceStore = useServiceStore()
+const authStore = useAuthStore()
 let serviceLength = ref(0)
-const serviceDelete = ref(null);
+const serviceDelete = ref(null)
 const totalPages = ref(0)
-let alertMessage = useCookie('alert-message')
-let alertPage = useCookie('alert-page')
+const dynamicPath = ref('')
+const linkRef = ref<HTMLAnchorElement | null>(null)
 
 const search = async (event: any) => {
   event.preventDefault()
@@ -31,45 +34,57 @@ const changePage = async (page: number) => {
   serviceLength.value = serviceStore.serviceAll.length
 }
 
+const exportService = async () => {
+  const blob = await serviceStore.exportService()
+  const url = URL.createObjectURL(blob)
+  dynamicPath.value = url
+}
+
 const confirmDeleteService = async () => {
   if (serviceDelete.value) {
-    await serviceStore.deleteService(serviceDelete.value.id);
+    await serviceStore.deleteService(serviceDelete.value.id)
     if (serviceStore.status_code === 200) {
-      Cookies.set('alert-message', 'Successfully deleted service');
-      Cookies.set('alert-page', 'Service');
-      alertMessage = useCookie('alert-message')
-      alertPage = useCookie('alert-page')
+      Cookies.set('alert-message', 'Successfully deleted service')
+      Cookies.set('alert-type', 'true')
+      Cookies.set('alert-page', 'Service')
+      getAlert()
     }
-    serviceDelete.value = null;
-    totalPages.value = Math.ceil(serviceStore.totalPages / serviceStore.pageSize)
+    serviceDelete.value = null
     serviceLength.value = serviceStore.serviceAll.length
+    totalPages.value = Math.ceil(serviceLength.value / serviceStore.pageSize)
+  } else {
+    getAlert()
   }
-};
+}
 
 onMounted(async () => {
   await serviceStore.getAllService()
+  await exportService()
   serviceLength.value = serviceStore.serviceAll.length
   totalPages.value = Math.ceil(serviceStore.totalPages / serviceStore.pageSize)
+  getAlert()
 })
 
 onBeforeRouteLeave((to, from, next) => {
-  Cookies.remove('alert-message');
-  Cookies.remove('alert-page');
-  next();
-});
+  Cookies.remove('alert-message')
+  Cookies.remove('alert-type')
+  Cookies.remove('alert-page')
+  next()
+})
 
 onBeforeRouteUpdate((to, from, next) => {
-  Cookies.remove('alert-message');
-  Cookies.remove('alert-page');
-  next();
-});
+  Cookies.remove('alert-message')
+  Cookies.remove('alert-type')
+  Cookies.remove('alert-page')
+  next()
+})
 </script>
 
 <template>
   <div class="content container mt-4">
     <div class="row">
       <div class="col-12">
-        <div v-if="alertPage == 'Service'" class="alert alert-success w-100" role="alert">
+        <div v-if="alertPage == 'Service'" class="alert w-100" :class="alertType != false ? 'alert-success' : 'alert-danger'" role="alert">
           {{ alertMessage }}
         </div>
       </div>
@@ -80,9 +95,10 @@ onBeforeRouteUpdate((to, from, next) => {
               <input type="search" class="input w-100" id="search" placeholder="Search service.."
                      autocomplete="off" v-model="keyword" @keyup="search">
             </form>
-            <NuxtLink :to="{path: `/dashboard/entertainment-service/create`}" class="button-primary-small d-none d-md-inline-block">Add
+            <NuxtLink v-if="authStore.user.user.role == 'admin'" :to="{path: `/dashboard/entertainment-service/create`}" class="button-primary-small d-none d-md-inline-block">Add
               New
               Service</NuxtLink>
+            <NuxtLink :to="dynamicPath" ref="linkRef" download class="button-reverse">Export Excel</NuxtLink>
           </div>
           <div class="wrapper-table mt-4">
             <table class="table" style="width:100%">
@@ -104,11 +120,11 @@ onBeforeRouteUpdate((to, from, next) => {
                             class="wrapper-icon icon-detail d-flex align-items-center justify-content-center">
                     <i class="fa-solid fa-eye" style="font-size: 0.85rem;"></i>
                   </NuxtLink>
-                  <NuxtLink :to="{path: `/dashboard/entertainment-service/edit/${service.id}`}"
+                  <NuxtLink v-if="authStore.user.user.role == 'admin'" :to="{path: `/dashboard/entertainment-service/edit/${service.id}`}"
                             class="wrapper-icon icon-edit d-flex align-items-center justify-content-center">
                     <i class="fa-solid fa-pen-to-square" style="font-size: 0.85rem;"></i>
                   </NuxtLink>
-                  <button type="button"
+                  <button v-if="authStore.user.user.role == 'admin'" type="button"
                           class="wrapper-icon icon-delete d-flex align-items-center justify-content-center"
                           data-bs-toggle="modal" data-bs-target="#deleteModal" @click="serviceDelete = service">
                     <i class="fa-solid fa-trash-can" style="font-size: 0.85rem;"></i>
