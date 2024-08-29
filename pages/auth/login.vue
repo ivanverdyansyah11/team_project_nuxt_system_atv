@@ -1,49 +1,57 @@
 <script setup lang="ts">
-import { useAuthStore } from '~/stores/auth'
-import { useField, useForm } from 'vee-validate'
+import {useAuthStore} from '~/stores/auth'
+import {useField, useForm} from 'vee-validate'
+import {navigateTo} from "nuxt/app"
+import {onMounted} from "vue"
+import {getAlert, alertMessage, alertType, alertPage} from "~/helpers/Alert"
 import * as yup from 'yup'
-import { navigateTo } from "nuxt/app"
-import Cookies from "js-cookie";
+import Cookies from "js-cookie"
 
 definePageMeta({
   title: 'Login Page',
   layout: 'auth',
 })
 
-const authStore = useAuthStore();
+const authStore = useAuthStore()
+
 const schema = yup.object({
   email: yup.string().email().required('Email is required'),
   password: yup.string().min(6, 'Password must be at least 6 characters').required('Password is required'),
-});
+})
 
 const { handleSubmit, resetForm } = useForm({
   validationSchema: schema,
-});
+})
 
-const { value: email, errorMessage: emailError } = useField('email');
-const { value: password, errorMessage: passwordError } = useField('password');
+const { value: email, errorMessage: emailError } = useField('email')
+const { value: password, errorMessage: passwordError } = useField('password')
 
-const authenticate = handleSubmit( async (values) => {
-  await authStore.login(values);
+const authenticate = handleSubmit(async (values) => {
+  await authStore.login(values)
   if (authStore.status_code === 200) {
     navigateTo('/dashboard')
+  } else {
+    getAlert()
   }
-});
-
-let alertMessage = useCookie('alert-message')
-let alertPage = useCookie('alert-page')
+})
 
 onBeforeRouteLeave((to, from, next) => {
-  Cookies.remove('alert-message');
-  Cookies.remove('alert-page');
-  next();
-});
+  Cookies.remove('alert-message')
+  Cookies.remove('alert-type')
+  Cookies.remove('alert-page')
+  next()
+})
 
 onBeforeRouteUpdate((to, from, next) => {
-  Cookies.remove('alert-message');
-  Cookies.remove('alert-page');
-  next();
-});
+  Cookies.remove('alert-message')
+  Cookies.remove('alert-type')
+  Cookies.remove('alert-page')
+  next()
+})
+
+onMounted(async () => {
+  getAlert()
+})
 </script>
 
 <template>
@@ -51,17 +59,20 @@ onBeforeRouteUpdate((to, from, next) => {
     <div class="col-12">
       <div class="topbar-login d-flex align-items-center justify-content-start">
         <div class="container">
-          <img src="../../../assets/image/brand/brand-logo.svg" alt="Brand Logo" style="height: 72px !important;">
+          <img src="../../assets/image/brand/brand-logo.svg" alt="Brand Logo" style="height: 72px !important;">
         </div>
       </div>
     </div>
     <div class="col-md-6 col-lg-4 col-xxl-3 mt-5">
       <div class="container">
         <div class="card-login d-flex flex-column align-items-center">
-          <div v-if="alertPage == 'Logout'" class="alert alert-success w-100" role="alert">
+          <div v-if="alertPage == 'Logout'" class="alert w-100" :class="alertType != false ? 'alert-success' : 'alert-danger'" role="alert">
             {{ alertMessage }}
           </div>
-          <div v-if="alertPage == 'Register'" class="alert alert-success w-100" role="alert">
+          <div v-if="alertPage == 'Register'" class="alert w-100" :class="alertType != false ? 'alert-success' : 'alert-danger'" role="alert">
+            {{ alertMessage }}
+          </div>
+          <div v-if="alertPage == 'Login'" class="alert w-100" :class="alertType != false ? 'alert-success' : 'alert-danger'" role="alert">
             {{ alertMessage }}
           </div>
           <h2 class="title w-100">Login 👋🏻</h2>
@@ -80,7 +91,7 @@ onBeforeRouteUpdate((to, from, next) => {
               <p v-if="passwordError" class="invalid-label">{{ passwordError }}</p>
             </div>
             <button type="submit" class="button-primary">Login Account</button>
-            <p class="text-redirect mt-2 text-center">Don't have an account yet? <NuxtLink to="/dashboard/auth/register">Register</NuxtLink></p>
+            <p class="text-redirect mt-2 text-center">Don't have an account yet? <NuxtLink to="/auth/register">Register</NuxtLink></p>
           </form>
         </div>
       </div>
