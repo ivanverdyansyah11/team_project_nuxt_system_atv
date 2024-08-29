@@ -1,6 +1,11 @@
-import Cookies from "js-cookie";
+import {ref} from "vue"
 
-export function setAlert(message: string, page: string): void {
-    Cookies.set('alert-message', message);
-    Cookies.set('alert-page', page);
+export const alertMessage = ref()
+export const alertType = ref()
+export const alertPage = ref()
+
+export function getAlert() {
+    alertMessage.value = useCookie('alert-message').value
+    alertType.value = useCookie('alert-type').value
+    alertPage.value = useCookie('alert-page').value
 }
