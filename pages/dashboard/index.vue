@@ -1,7 +1,33 @@
 <script setup lang="ts">
+import {useCustomerStore} from "~/stores/customer"
+import {useInstructorStore} from "~/stores/instructor"
+import {useBookingStore} from "~/stores/booking"
+import {ref, onMounted} from "vue"
+import {formatRupiah} from "~/helpers/FormatRupiah"
+
 definePageMeta({
   title: 'Dashboard Page',
   layout: 'dashboard'
+})
+
+const customerStore = useCustomerStore()
+const instructorStore = useInstructorStore()
+const bookingStore = useBookingStore()
+const customerLength = ref()
+const instructorLength = ref()
+const bookingLength = ref()
+const totalPrice = ref(0)
+
+onMounted(async () => {
+  await customerStore.getAllCustomerWithoutPaginate()
+  await instructorStore.getAllInstructorWithoutPaginate()
+  await bookingStore.getAllBookingWithoutPaginate()
+
+  customerLength.value = customerStore.customerAll.length
+  instructorLength.value = instructorStore.instructorAll.length
+  bookingLength.value = bookingStore.bookingAll.length
+  totalPrice.value = bookingStore.bookingAll.map(booking => booking.total_price)
+  totalPrice.value = totalPrice.value.reduce((accumulator, currentValue) => accumulator + currentValue, 0)
 })
 </script>
 
@@ -15,7 +41,7 @@ definePageMeta({
           </div>
           <div class="menu-value">
             <p>Total Customer</p>
-            <h6>12</h6>
+            <h6>{{customerLength}}</h6>
           </div>
         </div>
       </div>
@@ -25,8 +51,8 @@ definePageMeta({
             <i class="fa-regular fa-id-card"></i>
           </div>
           <div class="menu-value">
-            <p>Total Driver</p>
-            <h6>10</h6>
+            <p>Total Instructor</p>
+            <h6>{{instructorLength}}</h6>
           </div>
         </div>
       </div>
@@ -36,8 +62,8 @@ definePageMeta({
             <i class="fa-solid fa-money-bill-transfer"></i>
           </div>
           <div class="menu-value">
-            <p>Total Transaction</p>
-            <h6>4</h6>
+            <p>Total Booking</p>
+            <h6>{{bookingLength}}</h6>
           </div>
         </div>
       </div>
@@ -48,7 +74,7 @@ definePageMeta({
           </div>
           <div class="menu-value">
             <p>Total Income</p>
-            <h6>Rp. 100.000</h6>
+            <h6>{{formatRupiah(totalPrice)}}</h6>
           </div>
         </div>
       </div>
