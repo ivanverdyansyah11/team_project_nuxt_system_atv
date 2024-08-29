@@ -1,119 +1,136 @@
 <script setup lang="ts">
-import { useServiceStore } from "~/stores/service";
-import { useCategoryStore } from "~/stores/category";
-import { useRouteStore } from "~/stores/route";
-import { useFacilityStore } from "~/stores/facility";
-import { useInstructorStore } from "~/stores/instructor";
-import { useLuggageStore } from "~/stores/luggage";
-import { useRoute } from '#app';
-import { ref, onMounted } from 'vue';
-import { useField, useForm } from 'vee-validate'
+import {useServiceStore} from "~/stores/service"
+import {useCategoryStore} from "~/stores/category"
+import {useRouteStore} from "~/stores/route"
+import {useFacilityStore} from "~/stores/facility"
+import {useInstructorStore} from "~/stores/instructor"
+import {useLuggageStore} from "~/stores/luggage"
+import {useRoute} from '#app'
+import {ref, onMounted} from 'vue'
+import {useField, useForm} from 'vee-validate'
+import {navigateTo} from "nuxt/app"
+import Cookies from "js-cookie"
 import * as yup from 'yup'
-import Cookies from "js-cookie";
-import {navigateTo} from "nuxt/app";
 
 definePageMeta({
   title: 'Edit Service Page',
   layout: 'dashboard'
 })
 
-const serviceStore = useServiceStore();
-const categoryStore = useCategoryStore();
-const routeStore = useRouteStore();
-const facilityStore = useFacilityStore();
-const instructorStore = useInstructorStore();
-const luggageStore = useLuggageStore();
-const route = useRoute();
-const updateDataImage = ref('https://placehold.co/600x400?text=Image+Not+Found');
-const file = ref(null);
+const serviceStore = useServiceStore()
+const categoryStore = useCategoryStore()
+const routeStore = useRouteStore()
+const facilityStore = useFacilityStore()
+const instructorStore = useInstructorStore()
+const luggageStore = useLuggageStore()
+const route = useRoute()
+const updateDataImage = ref('https://placehold.co/600x400?text=Image+Not+Found')
+const file = ref(null)
 
 const schema = yup.object({
   name: yup.string().required('Name is required'),
   price: yup.number().required('Price is required'),
   entertainment_category_id: yup.string().required('Entertainment Category is required'),
+  duration: yup.number().required('Duration is required'),
+  description: yup.string().required('Description is required'),
   routes: yup.array().min(1, 'At least one route is required'),
   facilities: yup.array().min(1, 'At least one facility is required'),
   instructors: yup.array().min(1, 'At least one instructor is required'),
   mandatory_luggages: yup.array().min(1, 'At least one mandatory luggage is required'),
   image: yup.mixed().required('Image is required'),
-});
+})
 
-const { handleSubmit, resetForm, setValues } = useForm({
+const { handleSubmit, setValues } = useForm({
   validationSchema: schema,
-});
+})
 
-const { value: name, errorMessage: nameError } = useField('name');
-const { value: price, errorMessage: priceError } = useField('price');
-const { value: entertainment_category_id, errorMessage: entertainmentCategoryIdError } = useField('entertainment_category_id');
-const { value: image, errorMessage: imageError } = useField('image');
-const routes = ref([]);
-const routesError = ref('');
-const facilities = ref([]);
-const facilitiesError = ref('');
-const instructors = ref([]);
-const instructorsError = ref('');
-const mandatory_luggages = ref([]);
-const mandatoryLuggagesError = ref('');
+const { value: name, errorMessage: nameError } = useField('name')
+const { value: price, errorMessage: priceError } = useField('price')
+const { value: entertainment_category_id, errorMessage: entertainmentCategoryIdError } = useField('entertainment_category_id')
+const { value: duration, errorMessage: durationError } = useField('duration')
+const { value: description, errorMessage: descriptionError } = useField('description')
+const { value: image, errorMessage: imageError } = useField('image')
+const routes = ref([])
+const routesError = ref()
+const facilities = ref([])
+const facilitiesError = ref()
+const instructors = ref([])
+const instructorsError = ref()
+const mandatory_luggages = ref([])
+const mandatoryLuggagesError = ref()
 
 const loadService = async() => {
-  await serviceStore.getServiceById(route.params.id);
-  updateDataImage.value = serviceStore?.service?.image_path != null ? `http://localhost:8000/${serviceStore.service.image_path}` : 'https://placehold.co/600x400?text=Image+Not+Found';
+  await serviceStore.getServiceById(route.params.id)
+  updateDataImage.value = serviceStore.service.image_path != null ? `http://localhost:8000/${serviceStore.service.image_path}` : 'https://placehold.co/600x400?text=Image+Not+Found'
   setValues({
     name: serviceStore.service.name,
     price: serviceStore.service.price,
     entertainment_category_id: serviceStore.service.entertainment_category.id,
+    duration: serviceStore.service.duration,
+    description: serviceStore.service.description,
     image: updateDataImage.value,
   })
-  routes.value = serviceStore.service?.routes.map(r => r.route.id);
-  facilities.value = serviceStore.service?.facilities?.map(f => f.facility.id);
-  instructors.value = serviceStore.service?.instructors?.map(i => i.instructor.id);
-  mandatory_luggages.value = serviceStore.service?.mandatory_luggages?.map(m => m.mandatory_luggage.id);
+  routes.value = serviceStore.service.routes.map(r => r.route.id)
+  facilities.value = serviceStore.service.facilities.map(f => f.facility.id)
+  instructors.value = serviceStore.service.instructors.map(i => i.instructor.id)
+  mandatory_luggages.value = serviceStore.service.mandatory_luggages.map(m => m.mandatory_luggage.id)
 }
 
 const previewImage = (e: any) => {
-  if (!e.target.files.length) return;
-  file.value = e.target.files[0];
-  const reader = new FileReader();
+  if (!e.target.files.length) return
+  file.value = e.target.files[0]
+  const reader = new FileReader()
   reader.onload = () => {
     if (typeof reader.result === "string") {
-      updateDataImage.value = reader.result;
+      updateDataImage.value = reader.result
     }
-    e.target.value = "";
-  };
-  reader.readAsDataURL(file.value);
+    e.target.value = ""
+  }
+  reader.readAsDataURL(file.value)
 }
 
 const updateService = handleSubmit(async (values) => {
-  values.routes = routes.value.map(route_id => ({ route_id }));
-  values.facilities = facilities.value.map(facility_id => ({ facility_id }));
-  values.instructors = instructors.value.map(instructor_id => ({ instructor_id }));
-  values.mandatory_luggages = mandatory_luggages.value.map(mandatory_luggage_id => ({ mandatory_luggage_id }));
-
-  try {
-    await serviceStore.updateService(values, route.params.id);
-    if (file.value) {
-      const formData = new FormData();
-      formData.append('image', file.value);
-      await serviceStore.saveImageService(formData, serviceStore.service.id);
+  if (routes.value.length !== 0 && facilities.value.length !== 0 && instructors.value.length !== 0 && mandatory_luggages.value.length !== 0) {
+    values.routes = routes.value.map(route_id => ({ route_id }))
+    values.facilities = facilities.value.map(facility_id => ({ facility_id }))
+    values.instructors = instructors.value.map(instructor_id => ({ instructor_id }))
+    values.mandatory_luggages = mandatory_luggages.value.map(mandatory_luggage_id => ({ mandatory_luggage_id }))
+    const { image, ...valueData } = values
+    try {
+      await serviceStore.updateService(valueData, route.params.id)
+      if (file.value) {
+        const formData = new FormData()
+        formData.append('image', file.value)
+        await serviceStore.saveImageService(formData, serviceStore.service.id)
+      }
+      if(serviceStore.status_code == 200) {
+        Cookies.set('alert-message', 'Successfully update service')
+        Cookies.set('alert-type', 'true')
+        Cookies.set('alert-page', 'Service')
+        navigateTo('/dashboard/entertainment-service')
+      } else {
+        navigateTo('/dashboard/entertainment-service')
+      }
+    } catch (error) {
+      navigateTo('/dashboard/entertainment-service')
     }
-    Cookies.set('alert-message', 'Successfully update service');
-    Cookies.set('alert-page', 'Service');
-    navigateTo('/dashboard/entertainment-service');
-  } catch (error) {
-    console.error('Error updating service:', error);
+  } else {
+    routes.value.length === 0 ? routesError.value = 'Route is required' : routesError.value = ''
+    facilities.value.length === 0 ? facilitiesError.value = 'Facility is required' : facilitiesError.value = ''
+    instructors.value.length === 0 ? instructorsError.value = 'Instructor is required' : instructorsError.value = ''
+    mandatory_luggages.value.length === 0 ? mandatoryLuggagesError.value = 'Mandatory luggage is required' : mandatoryLuggagesError.value = ''
   }
-});
+})
 
 
 onMounted(async () => {
-  await categoryStore.getAllCategoryWithoutPaginate();
-  await routeStore.getAllRouteWithoutPaginate();
-  await facilityStore.getAllFacilityWithoutPaginate();
-  await instructorStore.getAllInstructorWithoutPaginate();
-  await luggageStore.getAllLuggageWithoutPaginate();
-
+  await categoryStore.getAllCategoryWithoutPaginate()
+  await routeStore.getAllRouteWithoutPaginate()
+  await facilityStore.getAllFacilityWithoutPaginate()
+  await instructorStore.getAllInstructorWithoutPaginate()
+  await luggageStore.getAllLuggageWithoutPaginate()
   await loadService()
-});
+})
 </script>
 
 <template>
@@ -150,13 +167,21 @@ onMounted(async () => {
                   <p v-if="priceError" class="invalid-label">{{ priceError }}</p>
                 </div>
               </div>
-              <div class="col-12">
+              <div class="col-md-6">
                 <div class="input-group d-flex flex-column">
                   <label for="entertainment_category_id">Entertainment Category</label>
                   <select class="input w-100" name="entertainment_category_id" id="entertainment_category_id" v-model="entertainment_category_id">
                     <option v-for="(category, index) in categoryStore.categoryAll" :key="index" :value="category.id">{{category.name}}</option>
                   </select>
                   <p v-if="entertainmentCategoryIdError" class="invalid-label">{{ entertainmentCategoryIdError }}</p>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="input-group d-flex flex-column">
+                  <label for="duration">Duration</label>
+                  <input type="number" class="input w-100" name="duration" id="duration"
+                         placeholder="Enter your duration.." autocomplete="off" v-model="duration">
+                  <p v-if="durationError" class="invalid-label">{{ durationError }}</p>
                 </div>
               </div>
               <div class="col-md-6">
@@ -205,6 +230,14 @@ onMounted(async () => {
                     </div>
                   </div>
                   <p v-if="mandatoryLuggagesError" class="invalid-label">{{ mandatoryLuggagesError }}</p>
+                </div>
+              </div>
+              <div class="col-12">
+                <div class="input-group d-flex flex-column">
+                  <label for="description">Description</label>
+                  <textarea class="input w-100" name="description" id="description"
+                            placeholder="Enter your description.." autocomplete="off" v-model="description" rows="4"></textarea>
+                  <p v-if="descriptionError" class="invalid-label">{{ descriptionError }}</p>
                 </div>
               </div>
               <div class="col-12">
