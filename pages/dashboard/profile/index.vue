@@ -1,52 +1,57 @@
 <script setup lang="ts">
-import { useAuthStore } from "~/stores/auth";
-import { ref, onMounted } from 'vue';
-import Cookies from "js-cookie";
+import { useAuthStore } from "~/stores/auth"
+import { ref, onMounted } from 'vue'
+import {getAlert, alertMessage, alertType, alertPage} from "~/helpers/Alert"
+import profileNotFound from '~/assets/image/profile/profile-not-found.svg'
+import Cookies from "js-cookie"
 
 definePageMeta({
   title: 'Profile Page',
   layout: 'dashboard'
-});
+})
 
-const authStore = useAuthStore();
-const updateDataImage = ref('https://placehold.co/600x400?text=Image+Not+Found');
-let alertMessage = useCookie('alert-message');
-let alertPage = useCookie('alert-page');
+const authStore = useAuthStore()
+const updateDataImage = ref()
 
 const loadProfile = async () => {
   try {
     await authStore.checkProfile();
-    const profilePath = authStore?.user?.user?.profile_path;
+    const profilePath = authStore.user.user.profile_path;
     if (profilePath) {
       updateDataImage.value = `http://localhost:8000/${profilePath}`;
     } else {
-      updateDataImage.value = 'https://placehold.co/600x400?text=Image+Not+Found';
+      updateDataImage.value = profileNotFound;
     }
   } catch (error) {
-    console.error('Error loading profile:', error);
+    Cookies.set('alert-message', 'Failed to load profile')
+    Cookies.set('alert-type', 'false')
+    Cookies.set('alert-page', 'Profile')
   }
-};
+}
 
 onMounted(async () => {
-  await loadProfile();
-});
+  await loadProfile()
+  getAlert()
+})
 
 onBeforeRouteLeave(() => {
-  Cookies.remove('alert-message');
-  Cookies.remove('alert-page');
-});
+  Cookies.remove('alert-message')
+  Cookies.remove('alert-type')
+  Cookies.remove('alert-page')
+})
 
 onBeforeRouteUpdate(() => {
-  Cookies.remove('alert-message');
-  Cookies.remove('alert-page');
-});
+  Cookies.remove('alert-message')
+  Cookies.remove('alert-type')
+  Cookies.remove('alert-page')
+})
 </script>
 
 <template>
   <div class="content container mt-4">
     <div class="row">
       <div class="col-12">
-        <div v-if="alertPage == 'Profile'" class="alert alert-success w-100" role="alert">
+        <div v-if="alertPage == 'Profile'" class="alert w-100" :class="alertType != false ? 'alert-success' : 'alert-danger'" role="alert">
           {{ alertMessage }}
         </div>
       </div>
@@ -56,7 +61,7 @@ onBeforeRouteUpdate(() => {
             <div class="row g-3">
               <div class="col-md-3">
                 <div class="input-group d-flex flex-column w-100 pe-xl-4">
-                  <label for="image">
+                  <label for="image" class="w-100">
                     Profile Image
                     <div class="wrapper d-flex flex-column align-items-end w-100" style="margin-top: 8px;">
                       <img :src="updateDataImage" class="input-image input-image-full" alt="Profile Image" style="border-radius: 4px;"/>
