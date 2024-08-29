@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import {useCustomerStore} from "~/stores/customer"
 import {useInstructorStore} from "~/stores/instructor"
-import {useBookingStore} from "~/stores/booking"
+import {useBookingServiceStore} from "~/stores/bookingService"
+import {useBookingPackageStore} from "~/stores/bookingPackage"
 import {ref, onMounted} from "vue"
 import {formatRupiah} from "~/helpers/FormatRupiah"
 
@@ -12,22 +13,33 @@ definePageMeta({
 
 const customerStore = useCustomerStore()
 const instructorStore = useInstructorStore()
-const bookingStore = useBookingStore()
-const customerLength = ref()
-const instructorLength = ref()
-const bookingLength = ref()
+const bookingServiceStore = useBookingServiceStore()
+const bookingPackageStore = useBookingPackageStore()
+const customerLength = ref(0)
+const instructorLength = ref(0)
+const bookingLength = ref(0)
+const bookingServiceLength = ref(0)
+const bookingPackageLength = ref(0)
 const totalPrice = ref(0)
+const totalPriceBookingService = ref()
+const totalPriceBookingPackage = ref()
 
 onMounted(async () => {
   await customerStore.getAllCustomerWithoutPaginate()
   await instructorStore.getAllInstructorWithoutPaginate()
-  await bookingStore.getAllBookingWithoutPaginate()
+  await bookingServiceStore.getAllBookingServiceWithoutPaginate()
+  await bookingPackageStore.getAllBookingPackageWithoutPaginate()
 
   customerLength.value = customerStore.customerAll.length
   instructorLength.value = instructorStore.instructorAll.length
-  bookingLength.value = bookingStore.bookingAll.length
-  totalPrice.value = bookingStore.bookingAll.map(booking => booking.total_price)
-  totalPrice.value = totalPrice.value.reduce((accumulator, currentValue) => accumulator + currentValue, 0)
+  bookingServiceLength.value = bookingServiceStore.bookingServiceAll.length
+  bookingPackageLength.value = bookingPackageStore.bookingPackageAll.length
+  bookingLength.value = bookingServiceLength.value + bookingPackageLength.value
+  totalPriceBookingService.value = bookingServiceStore.bookingServiceAll.map(booking => booking.total_price)
+  totalPriceBookingService.value = totalPriceBookingService.value.reduce((accumulator, currentValue) => accumulator + currentValue, 0)
+  totalPriceBookingPackage.value = bookingPackageStore.bookingPackageAll.map(booking => booking.total_price)
+  totalPriceBookingPackage.value = totalPriceBookingPackage.value.reduce((accumulator, currentValue) => accumulator + currentValue, 0)
+  totalPrice.value = totalPriceBookingService.value + totalPriceBookingPackage.value
 })
 </script>
 
