@@ -18,6 +18,10 @@
     .homepage .title-small {
         font-size: 1.5rem;
     }
+
+    .homepage section.profile .col-profile {
+        margin-top: -140px;
+    }
 }
 
 @media (max-width: 991.98px) {
@@ -77,6 +81,10 @@
     .homepage section.detail-blog .other-blog .title {
         margin-bottom: 32px;
         margin-top: 42px;
+    }
+
+    .homepage section.profile .background-image {
+        aspect-ratio: 4/1.3;
     }
 }
 
@@ -152,6 +160,10 @@
     .homepage section.service .content-value > .col:nth-child(1),
     .homepage section.service .content-value > .col:nth-child(2) {
         margin-top: 0;
+    }
+
+    .homepage section.profile .background-image {
+        aspect-ratio: 4/2;
     }
 }
 
