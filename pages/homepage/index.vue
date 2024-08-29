@@ -1,24 +1,44 @@
 <script setup lang="ts">
-import {useBundleStore} from "~/stores/bundle";
-import {useInstructorStore} from "~/stores/instructor";
-import {useServiceStore} from "~/stores/service";
-import { Swiper, SwiperSlide } from 'swiper/vue';
-import 'swiper/css';
-import 'swiper/swiper-bundle.css';
-import 'swiper/css/navigation';
+import {useBundleStore} from "~/stores/bundle"
+import {useInstructorStore} from "~/stores/instructor"
+import {useServiceStore} from "~/stores/service"
+import {useBlogStore} from "~/stores/blog"
+import { Swiper, SwiperSlide } from 'swiper/vue'
+import imageNotFound from '~/assets/image/other/image-not-found.svg'
+import 'swiper/css'
+import 'swiper/swiper-bundle.css'
+import 'swiper/css/navigation'
+import {formatDate} from "~/helpers/FormatDate"
+import Cookies from "js-cookie"
 
 definePageMeta({
-  layout: 'homepage'
+  layout: 'homepage',
 })
 
-const bundleStore = useBundleStore();
-const instructorStore = useInstructorStore();
-const serviceStore = useServiceStore();
+const bundleStore = useBundleStore()
+const instructorStore = useInstructorStore()
+const serviceStore = useServiceStore()
+const blogStore = useBlogStore()
+
+onBeforeRouteLeave((to, from, next) => {
+  Cookies.remove('alert-message')
+  Cookies.remove('alert-type')
+  Cookies.remove('alert-page')
+  next()
+})
+
+onBeforeRouteUpdate((to, from, next) => {
+  Cookies.remove('alert-message')
+  Cookies.remove('alert-type')
+  Cookies.remove('alert-page')
+  next()
+})
 
 onMounted(async () => {
   await bundleStore.getAllBundle()
   await instructorStore.getAllInstructorWithoutPaginate()
   await serviceStore.getAllService()
+  await blogStore.getAllBlog()
 })
 </script>
 
@@ -156,7 +176,7 @@ onMounted(async () => {
         <div class="col" v-for="(bundle, index) in bundleStore.bundleAll" :key="index">
           <NuxtLink :to="{path: `/homepage/package/${bundle.id}`}" class="card-package w-100">
             <div class="package-image">
-              <img :src="bundle.image_path != null ? `http://localhost:8000/${bundle.image_path}` : 'https://placehold.co/600x400?text=Image+Not+Found'" alt="Package Image">
+              <img :src="bundle.image_path != null ? `http://localhost:8000/${bundle.image_path}` : imageNotFound" alt="Package Image">
             </div>
             <h6>{{bundle.name}}</h6>
             <p>{{bundle.description}}</p>
@@ -244,13 +264,8 @@ onMounted(async () => {
             class="mySwiper">
           <SwiperSlide v-for="(instructor, index) in instructorStore.instructorAll" :key="index">
             <div class="card-instructor">
-              <img :src="instructor.user.profile_path ? `http://localhost:8000/${instructor.user.profile_path}` : 'https://placehold.co/600x400?text=Image+Not+Found'" alt="Instructor Image">
+              <img :src="instructor.user.profile_path ? `http://localhost:8000/${instructor.user.profile_path}` : imageNotFound" alt="Instructor Image">
               <h6>{{ instructor.name }}</h6>
-              <!-- <div class="instructor-scroll">
-                <div class="instructor-service d-flex gap-2 align-items-center flex-nowrap">
-                  <span v-for="(service, index) in instructor.services" :key="index">{{ service }}</span>
-                </div>
-              </div> -->
             </div>
           </SwiperSlide>
         </Swiper>
@@ -275,88 +290,23 @@ onMounted(async () => {
         </div>
       </div>
       <div class="row content-gap row-cols-2 row-cols-lg-3 g-2 g-md-3 g-lg-4">
-        <div class="col mt-md-0">
+        <div class="col" v-for="(blog, index) in blogStore.blogAll" :key="index">
           <div class="card-blog">
             <div class="blog-image">
-              <img src="~/assets/image/homepage/section-blog/blog-1.jpg" alt="Blog Image">
+              <img :src="blog.image_path != null ? `http://localhost:8000/${blog.image_path}` : imageNotFound" alt="Blog Image">
             </div>
-            <h6>Safety & Security: Comprehensive Guide to Riding ATVs Properly</h6>
-            <p>Riding an ATV for beginners isn't always a walk in the park. That's why it's crucial for us to delve into the fundamentals of riding...</p>
+            <h6>{{blog.title}}</h6>
+            <p>{{blog.description}}</p>
             <div class="wrapper d-flex justify-content-between align-items-center">
-              <NuxtLink :to="{path: '/homepage/blog/1'}">Read More</NuxtLink>
-              <p>04 Apr 2024</p>
-            </div>
-          </div>
-        </div>
-        <div class="col mt-md-0">
-          <div class="card-blog">
-            <div class="blog-image">
-              <img src="~/assets/image/homepage/section-blog/blog-2.jpg" alt="Blog Image">
-            </div>
-            <h6>Embark on an Amazing Adventure: Tips for Choosing the Best ATV</h6>
-            <p>ATVs are the vehicles we use to play on a route, choosing the best ATV will make you more comfortable and confident playing...</p>
-            <div class="wrapper d-flex justify-content-between align-items-center">
-              <NuxtLink :to="{path: '/homepage/blog/1'}">Read More</NuxtLink>
-              <p>14 Apr 2024</p>
-            </div>
-          </div>
-        </div>
-        <div class="col mt-lg-0">
-          <div class="card-blog">
-            <div class="blog-image">
-              <img src="~/assets/image/homepage/section-blog/blog-3.jpg" alt="Blog Image">
-            </div>
-            <h6>Tips & Tricks for Beginners Riding ATVs on Various Terrains</h6>
-            <p>It's important for beginners to understand the terrains they will encounter. Check out the following tips and tricks to learn the details of the terrains...</p>
-            <div class="wrapper d-flex justify-content-between align-items-center">
-              <NuxtLink :to="{path: '/homepage/blog/1'}">Read More</NuxtLink>
-              <p>18 Apr 2024</p>
-            </div>
-          </div>
-        </div>
-        <div class="col">
-          <div class="card-blog">
-            <div class="blog-image">
-              <img src="~/assets/image/homepage/section-blog/blog-4.jpg" alt="Blog Image">
-            </div>
-            <h6>Why ATVs Are the Ultimate Choice for Adrenaline Junkies? Let's Find Out</h6>
-            <p>The allure of challenging terrains often motivates individuals to test their skills and conquer those thrilling routes...</p>
-            <div class="wrapper d-flex justify-content-between align-items-center">
-              <NuxtLink :to="{path: '/homepage/blog/1'}">Read More</NuxtLink>
-              <p>06 Apr 2024</p>
-            </div>
-          </div>
-        </div>
-        <div class="col">
-          <div class="card-blog">
-            <div class="blog-image">
-              <img src="~/assets/image/homepage/section-blog/blog-5.jpg" alt="Blog Image">
-            </div>
-            <h6>Adventure Tales: Unforgettable Experiences at AT Ride</h6>
-            <p>The exhilarating sensation of navigating through challenging terrains makes for unforgettable experiences and lasting memories...</p>
-            <div class="wrapper d-flex justify-content-between align-items-center">
-              <NuxtLink :to="{path: '/homepage/blog/1'}">Read More</NuxtLink>
-              <p>20 Apr 2024</p>
-            </div>
-          </div>
-        </div>
-        <div class="col">
-          <div class="card-blog">
-            <div class="blog-image">
-              <img src="~/assets/image/homepage/section-blog/blog-6.jpg" alt="Blog Image">
-            </div>
-            <h6>Physical and Mental Preparation for ATV Riding on Various Terrains</h6>
-            <p>Having strong physical and mental stamina while riding on challenging terrains is crucial. It's important to have physical readiness...</p>
-            <div class="wrapper d-flex justify-content-between align-items-center">
-              <NuxtLink :to="{path: '/homepage/blog/1'}">Read More</NuxtLink>
-              <p>16 Apr 2024</p>
+              <NuxtLink :to="{path: `/homepage/blog/${blog.id}`}">Read More</NuxtLink>
+              <p>{{formatDate(blog.created_at)}}</p>
             </div>
           </div>
         </div>
       </div>
       <div class="row content-gap content-value">
         <div class="col-12 d-flex justify-content-center">
-          <NuxtLink :to="{path: `/homepage/instructor`}" class="button-primary-small">More Blog</NuxtLink>
+          <NuxtLink :to="{path: `/homepage/blog`}" class="button-primary-small">More Blog</NuxtLink>
         </div>
       </div>
     </div>
