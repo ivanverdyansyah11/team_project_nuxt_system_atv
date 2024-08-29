@@ -26,7 +26,12 @@ const toggleActive = (event: Event) => {
         <i class="fa-solid fa-gauge"></i>
         Dashboard
       </NuxtLink>
-      <button type="button" class="menu-link d-flex flex-column parent-menu" :class="{ active: $route.path.startsWith('/dashboard/instructor') || $route.path.startsWith('/dashboard/staff') || $route.path.startsWith('/dashboard/customer') }" @click="toggleActive($event)">
+      <NuxtLink to="/homepage"
+                class="menu-link d-flex align-items-center gap-2" :class="{ active: $route.path === '/homepage' }">
+        <i class="fa-solid fa-tv"></i>
+        Homepage
+      </NuxtLink>
+      <button v-if="authStore.user.user.role == 'admin'" type="button" class="menu-link d-flex flex-column parent-menu" :class="{ active: $route.path.startsWith('/dashboard/instructor') || $route.path.startsWith('/dashboard/staff') || $route.path.startsWith('/dashboard/customer') }" @click="toggleActive($event)">
         <div class="wrapper d-flex align-items-center gap-2">
           <i class="fa-solid fa-circle-user"></i>
           User
@@ -37,32 +42,48 @@ const toggleActive = (event: Event) => {
           <NuxtLink to="/dashboard/customer" :class="{ active: $route.path.startsWith('/dashboard/customer') }">Customer</NuxtLink>
         </div>
       </button>
-      <NuxtLink to="/dashboard/facility"
-                class="menu-link d-flex align-items-center gap-2" :class="{ active: $route.path === '/dashboard/facility' }">
-        <i class="fa-solid fa-screwdriver-wrench"></i>
-        Facility
-      </NuxtLink>
-      <NuxtLink to="/dashboard/route"
-                class="menu-link d-flex align-items-center gap-2" :class="{ active: $route.path === '/dashboard/route' }">
-        <i class="fa-solid fa-map-location-dot"></i>
-        Route
-      </NuxtLink>
-      <NuxtLink to="/dashboard/luggage"
-                class="menu-link d-flex align-items-center gap-2" :class="{ active: $route.path === '/dashboard/luggage' }">
-        <i class="fa-solid fa-briefcase"></i>
-        Luggage
-      </NuxtLink>
-      <button type="button" class="menu-link d-flex flex-column parent-menu" :class="{ active: $route.path.startsWith('/dashboard/entertainment-category') || $route.path.startsWith('/dashboard/entertainment-package') || $route.path.startsWith('/dashboard/entertainment-service') }" @click="toggleActive($event)">
+      <button v-if="authStore.user.user.role == 'admin'" type="button" class="menu-link d-flex flex-column parent-menu" :class="{ active: $route.path.startsWith('/dashboard/facility') || $route.path.startsWith('/dashboard/route') || $route.path.startsWith('/dashboard/luggage') }" @click="toggleActive($event)">
+        <div class="wrapper d-flex align-items-center gap-2">
+          <i class="fa-solid fa-database"></i>
+          Master Data
+        </div>
+        <div class="child-menu flex-column gap-1">
+          <NuxtLink to="/dashboard/facility" :class="{ active: $route.path.startsWith('/dashboard/facility') }">Facility</NuxtLink>
+          <NuxtLink to="/dashboard/route" :class="{ active: $route.path.startsWith('/dashboard/route') }">Route</NuxtLink>
+          <NuxtLink to="/dashboard/luggage" :class="{ active: $route.path.startsWith('/dashboard/luggage') }">Luggage</NuxtLink>
+        </div>
+      </button>
+      <button type="button" class="menu-link d-flex flex-column parent-menu" :class="{ active: $route.path.startsWith('/dashboard/entertainment') }" @click="toggleActive($event)">
         <div class="wrapper d-flex align-items-center gap-2">
           <i class="fa-solid fa-mountain-sun"></i>
           Entertainment
         </div>
         <div class="child-menu flex-column gap-1">
-          <NuxtLink to="/dashboard/entertainment-category" :class="{ active: $route.path.startsWith('/dashboard/entertainment-category') }">Category</NuxtLink>
-          <NuxtLink to="/dashboard/entertainment-package" :class="{ active: $route.path.startsWith('/dashboard/entertainment-package') }">Package</NuxtLink>
+          <NuxtLink v-if="authStore.user.user.role == 'admin'" to="/dashboard/entertainment-category" :class="{ active: $route.path.startsWith('/dashboard/entertainment-category') }">Category</NuxtLink>
           <NuxtLink to="/dashboard/entertainment-service" :class="{ active: $route.path.startsWith('/dashboard/entertainment-service') }">Service</NuxtLink>
+          <NuxtLink to="/dashboard/entertainment-package" :class="{ active: $route.path.startsWith('/dashboard/entertainment-package') }">Package</NuxtLink>
         </div>
       </button>
+      <NuxtLink v-if="authStore.user.user.role != 'instructor'" to="/dashboard/blog"
+                class="menu-link d-flex align-items-center gap-2" :class="{ active: $route.path === '/dashboard/blog' }">
+        <i class="fa-solid fa-newspaper"></i>
+        Blog
+      </NuxtLink>
+      <button v-if="authStore.user.user.role != 'instructor'" type="button" class="menu-link d-flex flex-column parent-menu" :class="{ active: $route.path.startsWith('/dashboard/booking') }" @click="toggleActive($event)">
+        <div class="wrapper d-flex align-items-center gap-2">
+          <i class="fa-solid fa-money-bill-transfer"></i>
+          Booking
+        </div>
+        <div class="child-menu flex-column gap-1">
+          <NuxtLink to="/dashboard/booking/service" :class="{ active: $route.path.startsWith('/dashboard/booking/service') }">Service</NuxtLink>
+          <NuxtLink to="/dashboard/booking/package" :class="{ active: $route.path.startsWith('/dashboard/booking/package') }">Package</NuxtLink>
+        </div>
+      </button>
+      <NuxtLink to="/dashboard/history-booking"
+                class="menu-link d-flex align-items-center gap-2" :class="{ active: $route.path.startsWith('/dashboard/history-booking') }">
+        <i class="fa-solid fa-credit-card"></i>
+        History Booking
+      </NuxtLink>
       <form @submit.prevent="logout">
         <button type="submit" class="menu-link d-flex gap-2 align-items-center">
           <i class="fa-solid fa-right-from-bracket"></i>
@@ -74,5 +95,4 @@ const toggleActive = (event: Event) => {
 </template>
 
 <style scoped>
-
 </style>
