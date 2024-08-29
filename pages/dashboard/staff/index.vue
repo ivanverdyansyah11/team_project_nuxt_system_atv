@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import { useStaffStore } from "~/stores/staff";
-import { ref, onMounted } from 'vue'
-import { useField, useForm } from 'vee-validate'
+import {useStaffStore} from "~/stores/staff"
+import {ref, onMounted} from 'vue'
+import {useField, useForm} from 'vee-validate'
+import {getAlert, alertMessage, alertType, alertPage} from "~/helpers/Alert"
 import Cookies from 'js-cookie'
 import * as yup from 'yup'
 
@@ -13,28 +14,29 @@ definePageMeta({
 const keyword = ref('')
 const staffStore = useStaffStore()
 let staffLength = ref(0)
-const staffData = ref(null);
+const staffData = ref(null)
 const totalPages = ref(0)
-let alertMessage = useCookie('alert-message')
-let alertPage = useCookie('alert-page')
+const dynamicPath = ref('')
+const linkRef = ref<HTMLAnchorElement | null>(null)
+const passwordErrorRequired = ref()
 
 const schema = yup.object({
   name: yup.string().required('Name is required'),
   employee_code: yup.string().required('Employee code is required'),
   username: yup.string().required('Username is required'),
   email: yup.string().email().required('Email is required'),
-  password: yup.string(),
-});
+  password: yup.string().min(6, 'Password must be at least 6 characters').notRequired(),
+})
 
 const { handleSubmit, resetForm, setValues } = useForm({
   validationSchema: schema,
-});
+})
 
-const { value: name, errorMessage: nameError } = useField('name');
-const { value: employee_code, errorMessage: employeeCodeError } = useField('employee_code');
-const { value: username, errorMessage: usernameError } = useField('username');
-const { value: email, errorMessage: emailError } = useField('email');
-const { value: password, errorMessage: passwordError } = useField('password');
+const { value: name, errorMessage: nameError } = useField('name')
+const { value: employee_code, errorMessage: employeeCodeError } = useField('employee_code')
+const { value: username, errorMessage: usernameError } = useField('username')
+const { value: email, errorMessage: emailError } = useField('email')
+const { value: password, errorMessage: passwordError } = useField('password')
 
 const search = async (event: any) => {
   event.preventDefault()
@@ -51,105 +53,118 @@ const changePage = async (page: number) => {
   staffLength.value = staffStore.staffAll.length
 }
 
-const createStaff = handleSubmit( async (values) => {
-  await staffStore.createStaff(values);
-  if (staffStore.status_code === 200) {
-    Cookies.set('alert-message', 'Successfully create new staff');
-    Cookies.set('alert-page', 'Staff');
-    alertMessage = useCookie('alert-message')
-    alertPage = useCookie('alert-page')
-    setValues({
-      name: '',
-      employee_code: '',
-      username: '',
-      email: '',
-      password: '',
-    });
-    await staffStore.getAllStaff()
-    totalPages.value = Math.ceil(staffStore.totalPages / staffStore.pageSize)
-    staffLength.value = staffStore.staffAll.length
-  }
-});
-
-const removeStaffDetail = async () => {
-  staffData.value = null
-  setValues({
-    name: '',
-    employee_code: '',
-    username: '',
-    email: '',
-  });
+const exportStaff = async () => {
+  const blob = await staffStore.exportStaff()
+  const url = URL.createObjectURL(blob)
+  dynamicPath.value = url
 }
 
 const staffDetail = async (staffSelect: any) => {
-  await staffStore.getStaffById(staffSelect.id);
+  await staffStore.getStaffById(staffSelect.id)
   staffData.value = staffSelect
-  const staff = staffStore.staff;
+  const staff = staffStore.staff
   setValues({
     name: staff.name,
     employee_code: staff.employee_code,
     username: staff.user.username,
     email: staff.user.email,
-  });
+  })
 }
 
-const updateStaff = handleSubmit( async (values) => {
-  await staffStore.updateStaff(values, staffData.value.id);
-  if (staffStore.status_code === 200) {
-    Cookies.set('alert-message', 'Successfully update staff');
-    Cookies.set('alert-page', 'Staff');
-    alertMessage = useCookie('alert-message')
-    alertPage = useCookie('alert-page')
-    setValues({
-      name: '',
-      employee_code: '',
-      username: '',
-      email: '',
-    });
-    staffData.value = null;
-    await staffStore.getAllStaff()
+const removeInputValues = () => {
+  setValues({
+    name: '',
+    employee_code: '',
+    username: '',
+    email: '',
+    password: '',
+  })
+}
+
+const removeStaffDetail = async () => {
+  staffData.value = null
+  removeInputValues()
+}
+
+const createStaff = handleSubmit( async (values) => {
+  if (values.password != undefined) {
+    await staffStore.createStaff(values)
+    if (staffStore.status_code === 201) {
+      Cookies.set('alert-message', 'Successfully create new staff')
+      Cookies.set('alert-type', 'true')
+      Cookies.set('alert-page', 'Staff')
+      getAlert()
+      removeInputValues()
+      await staffStore.getAllStaff()
+      totalPages.value = Math.ceil(staffStore.totalPages / staffStore.pageSize)
+      staffLength.value = staffStore.staffAll.length
+    } else {
+      getAlert()
+    }
+  } else {
+    passwordErrorRequired.value = 'Password is required'
   }
-});
+})
+
+const updateStaff = handleSubmit( async (values) => {
+  await staffStore.updateStaff(values, staffData.value.id)
+  if (staffStore.status_code === 200) {
+    Cookies.set('alert-message', 'Successfully update staff')
+    Cookies.set('alert-type', 'true')
+    Cookies.set('alert-page', 'Staff')
+    getAlert()
+    removeInputValues()
+    staffData.value = null
+    await staffStore.getAllStaff()
+  } else {
+    getAlert()
+  }
+})
 
 const confirmDeleteStaff = async () => {
   if (staffData.value) {
-    await staffStore.deleteStaff(staffData.value.id);
+    await staffStore.deleteStaff(staffData.value.id)
     if (staffStore.status_code === 200) {
-      Cookies.set('alert-message', 'Successfully deleted staff');
-      Cookies.set('alert-page', 'Staff');
-      alertMessage = useCookie('alert-message')
-      alertPage = useCookie('alert-page')
+      Cookies.set('alert-message', 'Successfully deleted staff')
+      Cookies.set('alert-type', 'true')
+      Cookies.set('alert-page', 'Staff')
+      getAlert()
     }
-    staffData.value = null;
-    totalPages.value = Math.ceil(staffStore.totalPages / staffStore.pageSize)
+    staffData.value = null
     staffLength.value = staffStore.staffAll.length
+    totalPages.value = Math.ceil(staffLength.value / staffStore.pageSize)
+  } else {
+    getAlert()
   }
-};
+}
 
 onMounted(async () => {
   await staffStore.getAllStaff()
+  await exportStaff()
   staffLength.value = staffStore.staffAll.length
   totalPages.value = Math.ceil(staffStore.totalPages / staffStore.pageSize)
 })
 
 onBeforeRouteLeave((to, from, next) => {
-  Cookies.remove('alert-message');
-  Cookies.remove('alert-page');
-  next();
-});
+  Cookies.remove('alert-message')
+  Cookies.remove('alert-type')
+  Cookies.remove('alert-page')
+  next()
+})
 
 onBeforeRouteUpdate((to, from, next) => {
-  Cookies.remove('alert-message');
-  Cookies.remove('alert-page');
-  next();
-});
+  Cookies.remove('alert-message')
+  Cookies.remove('alert-type')
+  Cookies.remove('alert-page')
+  next()
+})
 </script>
 
 <template>
   <div class="content container mt-4">
     <div class="row">
       <div class="col-12">
-        <div v-if="alertPage == 'Staff'" class="alert alert-success w-100" role="alert">
+        <div v-if="alertPage == 'Staff'" class="alert w-100" :class="alertType != false ? 'alert-success' : 'alert-danger'" role="alert">
           {{ alertMessage }}
         </div>
       </div>
@@ -163,6 +178,7 @@ onBeforeRouteUpdate((to, from, next) => {
             <button type="button" class="button-primary-small d-none d-md-inline-block" data-bs-toggle="modal" data-bs-target="#createModal">Add
               New
               Staff</button>
+            <NuxtLink :to="dynamicPath" ref="linkRef" download class="button-reverse">Export Excel</NuxtLink>
           </div>
           <div class="wrapper-table mt-4">
             <table class="table" style="width:100%">
@@ -319,7 +335,7 @@ onBeforeRouteUpdate((to, from, next) => {
                     <label for="password">Password</label>
                     <input type="password" class="input w-100" name="password" id="password"
                            placeholder="Enter your password.." autocomplete="off" v-model="password">
-                    <p v-if="passwordError" class="invalid-label">{{ passwordError }}</p>
+                    <p v-if="passwordError || passwordErrorRequired" class="invalid-label">{{ passwordError || passwordErrorRequired }}</p>
                   </div>
                 </div>
               </div>
