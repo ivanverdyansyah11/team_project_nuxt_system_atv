@@ -1,8 +1,9 @@
 <script setup lang="ts">
-import { useFacilityStore } from "~/stores/facility";
+import {useFacilityStore} from "~/stores/facility"
+import {ref, onMounted} from 'vue'
+import {useField, useForm} from 'vee-validate'
+import {getAlert, alertMessage, alertType, alertPage} from "~/helpers/Alert"
 import Cookies from 'js-cookie'
-import { ref, onMounted } from 'vue'
-import { useField, useForm } from 'vee-validate'
 import * as yup from 'yup'
 
 definePageMeta({
@@ -13,20 +14,20 @@ definePageMeta({
 const keyword = ref('')
 const facilityStore = useFacilityStore()
 let facilityLength = ref(0)
-const facilityData = ref(null);
+const facilityData = ref(null)
 const totalPages = ref(0)
-let alertMessage = useCookie('alert-message')
-let alertPage = useCookie('alert-page')
+const dynamicPath = ref('')
+const linkRef = ref<HTMLAnchorElement | null>(null)
 
 const schema = yup.object({
   name: yup.string().required('Name is required'),
-});
+})
 
-const { handleSubmit, resetForm, setValues } = useForm({
+const { handleSubmit, setValues } = useForm({
   validationSchema: schema,
-});
+})
 
-const { value: name, errorMessage: nameError } = useField('name');
+const { value: name, errorMessage: nameError } = useField('name')
 
 const search = async (event: any) => {
   event.preventDefault()
@@ -43,92 +44,107 @@ const changePage = async (page: number) => {
   facilityLength.value = facilityStore.facilityAll.length
 }
 
-const createFacility = handleSubmit( async (values) => {
-  await facilityStore.createFacility(values);
-  if (facilityStore.status_code === 200) {
-    Cookies.set('alert-message', 'Successfully create new facility');
-    Cookies.set('alert-page', 'Facility');
-    alertMessage = useCookie('alert-message')
-    alertPage = useCookie('alert-page')
-    setValues({
-      name: '',
-    });
-    await facilityStore.getAllFacility()
-    totalPages.value = Math.ceil(facilityStore.totalPages / facilityStore.pageSize)
-    facilityLength.value = facilityStore.facilityAll.length
-  }
-});
-
-const removeFacilityDetail = async () => {
-  facilityData.value = null
-  setValues({
-    name: '',
-  });
+const exportFacility = async () => {
+  const blob = await facilityStore.exportFacility()
+  const url = URL.createObjectURL(blob)
+  dynamicPath.value = url
 }
 
 const facilityDetail = async (facilitySelect: any) => {
-  await facilityStore.getFacilityById(facilitySelect.id);
+  await facilityStore.getFacilityById(facilitySelect.id)
   facilityData.value = facilitySelect
-  const facility = facilityStore.facility;
+  const facility = facilityStore.facility
   setValues({
     name: facility.name,
-  });
+  })
 }
 
-const updateFacility = handleSubmit( async (values) => {
-  await facilityStore.updateFacility(values, facilityData.value.id);
-  if (facilityStore.status_code === 200) {
-    Cookies.set('alert-message', 'Successfully update facility');
-    Cookies.set('alert-page', 'Facility');
-    alertMessage = useCookie('alert-message')
-    alertPage = useCookie('alert-page')
-    setValues({
-      name: '',
-    });
-    facilityData.value = null;
+const removeInputValues = () => {
+  setValues({
+    name: '',
+  })
+}
+
+const removeFacilityDetail = async () => {
+  facilityData.value = null
+  removeInputValues()
+}
+
+const createFacility = handleSubmit( async (values) => {
+  await facilityStore.createFacility(values)
+  if (facilityStore.status_code === 201) {
+    Cookies.set('alert-message', 'Successfully create new facility')
+    Cookies.set('alert-type', 'true')
+    Cookies.set('alert-page', 'Facility')
+    getAlert()
+    removeInputValues()
     await facilityStore.getAllFacility()
+    totalPages.value = Math.ceil(facilityStore.totalPages / facilityStore.pageSize)
+    facilityLength.value = facilityStore.facilityAll.length
+  } else {
+    getAlert()
   }
-});
+})
+
+const updateFacility = handleSubmit( async (values) => {
+  await facilityStore.updateFacility(values, facilityData.value.id)
+  if (facilityStore.status_code === 200) {
+    Cookies.set('alert-message', 'Successfully update facility')
+    Cookies.set('alert-type', 'true')
+    Cookies.set('alert-page', 'Facility')
+    getAlert()
+    removeInputValues()
+    facilityData.value = null
+    await facilityStore.getAllFacility()
+  } else {
+    getAlert()
+  }
+})
 
 const confirmDeleteFacility = async () => {
   if (facilityData.value) {
-    await facilityStore.deleteFacility(facilityData.value.id);
+    await facilityStore.deleteFacility(facilityData.value.id)
     if (facilityStore.status_code === 200) {
-      Cookies.set('alert-message', 'Successfully deleted facility');
-      Cookies.set('alert-page', 'Facility');
-      alertMessage = useCookie('alert-message')
-      alertPage = useCookie('alert-page')
+      Cookies.set('alert-message', 'Successfully deleted facility')
+      Cookies.set('alert-type', 'true')
+      Cookies.set('alert-page', 'Facility')
+      getAlert()
     }
-    facilityData.value = null;
-    totalPages.value = Math.ceil(facilityStore.totalPages / facilityStore.pageSize)
+    facilityData.value = null
     facilityLength.value = facilityStore.facilityAll.length
+    totalPages.value = Math.ceil(facilityLength.value / facilityStore.pageSize)
+  } else {
+    getAlert()
   }
-};
+}
 
 onMounted(async () => {
   await facilityStore.getAllFacility()
+  await exportFacility()
   facilityLength.value = facilityStore.facilityAll.length
   totalPages.value = Math.ceil(facilityStore.totalPages / facilityStore.pageSize)
 })
 
 onBeforeRouteLeave((to, from, next) => {
-  Cookies.remove('alert-message');
-  Cookies.remove('alert-page');
-  next();
-});
+  Cookies.remove('alert-message')
+  Cookies.remove('alert-type')
+  Cookies.remove('alert-page')
+  next()
+})
 
 onBeforeRouteUpdate((to, from, next) => {
-  Cookies.remove('alert-message');
-  Cookies.remove('alert-page');
-  next();
-});
+  Cookies.remove('alert-message')
+  Cookies.remove('alert-type')
+  Cookies.remove('alert-page')
+  next()
+})
 </script>
 
 <template>
   <div class="content container mt-4">
     <div class="row">
       <div class="col-12">
-        <div v-if="alertPage == 'Facility'" class="alert alert-success w-100" role="alert">
+        <div v-if="alertPage == 'Facility'" class="alert w-100" :class="alertType != false ? 'alert-success' : 'alert-danger'" role="alert">
           {{ alertMessage }}
         </div>
       </div>
@@ -142,6 +158,7 @@ onBeforeRouteUpdate((to, from, next) => {
             <button type="button" class="button-primary-small d-none d-md-inline-block" data-bs-toggle="modal" data-bs-target="#createModal">Add
               New
               Facility</button>
+            <NuxtLink :to="dynamicPath" ref="linkRef" download class="button-reverse">Export Excel</NuxtLink>
           </div>
           <div class="wrapper-table mt-4">
             <table class="table" style="width:100%">
