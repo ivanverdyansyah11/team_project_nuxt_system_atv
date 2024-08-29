@@ -1,39 +1,39 @@
 <script setup lang="ts">
-import { useBundleStore } from "~/stores/bundle";
-import { useServiceStore } from "~/stores/service";
-import { ref, onMounted, computed } from 'vue';
-import { useRoute } from '#app';
-import { formatRupiah } from "~/helpers/FormatRupiah";
+import {useBundleStore} from "~/stores/bundle"
+import {useServiceStore} from "~/stores/service"
+import {ref, onMounted, computed} from 'vue'
+import {useRoute} from '#app'
+import {formatRupiah} from "~/helpers/FormatRupiah"
 
 definePageMeta({
   title: 'Detail Package Page',
   layout: 'dashboard'
 })
 
-const bundleStore = useBundleStore();
-const serviceStore = useServiceStore();
-const route = useRoute();
+const bundleStore = useBundleStore()
+const serviceStore = useServiceStore()
+const route = useRoute()
 
-await bundleStore.getBundleById(route.params.id);
-const services = ref([]);
+await bundleStore.getBundleById(route.params.id)
+const services = ref([])
 
 const formattedExpiredAt = computed(() => {
   if (bundleStore.bundle.expired_at) {
-    const date = new Date(bundleStore.bundle.expired_at);
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const day = String(date.getDate()).padStart(2, '0');
-    const hours = String(date.getHours()).padStart(2, '0');
-    const minutes = String(date.getMinutes()).padStart(2, '0');
-    return `${year}-${month}-${day}T${hours}:${minutes}`;
+    const date = new Date(bundleStore.bundle.expired_at)
+    const year = date.getFullYear()
+    const month = String(date.getMonth() + 1).padStart(2, '0')
+    const day = String(date.getDate()).padStart(2, '0')
+    const hours = String(date.getHours()).padStart(2, '0')
+    const minutes = String(date.getMinutes()).padStart(2, '0')
+    return `${year}-${month}-${day}T${hours}:${minutes}`
   }
-  return '';
-});
+  return ''
+})
 
 onMounted(async () => {
-  await serviceStore.getAllServiceWithoutPagination();
-  services.value = bundleStore.bundle?.services.map(s => s.entertainment_service.id);
-});
+  await serviceStore.getAllServiceWithoutPagination()
+  services.value = bundleStore.bundle?.services.map(s => s.entertainment_service.id)
+})
 </script>
 
 <template>
@@ -46,7 +46,7 @@ onMounted(async () => {
               <div class="col-12 d-flex gap-3 align-items-end">
                 <div class="wrapper d-flex flex-column">
                   <label for="image" class="form-label">Package Image</label>
-                  <img :src="bundleStore?.bundle?.image_path != null ? `http://localhost:8000/${bundleStore.bundle.image_path}` : 'https://placehold.co/600x400?text=Image+Not+Found'" class="input-image" alt="Package Image" style="border-radius: 4px;"/>
+                  <img :src="bundleStore?.bundle.image_path != null ? `http://localhost:8000/${bundleStore.bundle.image_path}` : 'https://placehold.co/600x400?text=Image+Not+Found'" class="input-image" alt="Package Image" style="border-radius: 4px;"/>
                 </div>
               </div>
               <div class="col-12">
