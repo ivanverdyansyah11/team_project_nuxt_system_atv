@@ -1,8 +1,9 @@
 <script setup lang="ts">
-import {useServiceStore} from "~/stores/service";
+import {useServiceStore} from "~/stores/service"
 import {ref, onMounted} from 'vue'
+import imageNotFound from '~/assets/image/other/image-not-found.svg'
 
-const serviceStore = useServiceStore();
+const serviceStore = useServiceStore()
 const keyword = ref('')
 let serviceLength = ref(0)
 
@@ -14,12 +15,12 @@ definePageMeta({
 const search = async (event: any) => {
   event.preventDefault()
   serviceStore.$state.keyword = keyword.value
-  await serviceStore.getAllService()
+  await serviceStore.getAllServiceWithoutPagination()
   serviceLength.value = serviceStore.serviceAll.length
 }
 
 onMounted(async () => {
-  await serviceStore.getAllService();
+  await serviceStore.getAllServiceWithoutPagination()
   serviceLength.value = serviceStore.serviceAll.length
 })
 </script>
@@ -42,10 +43,10 @@ onMounted(async () => {
 
   <!-- SECTION SERVICE -->
   <section class="service container content-gap" id="service">
-    <div class="row content-gap" :class="{'row-cols-2 row-cols-md-4 row-cols-xl-5 g-3 g-md-4 content-gap content-value': serviceLength > 0}">
+    <div class="row content-gap" :class="{'row-cols-2 row-cols-md-4 row-cols-xl-5 g-3 g-md-4 content-value': serviceLength > 0}">
       <div v-if="serviceLength > 0" class="col" v-for="(service, index) in serviceStore.serviceAll" :key="index">
         <div class="card-service">
-          <img :src="service.image_path != null ? `http://localhost:8000/${service.image_path}` : 'https://placehold.co/600x400?text=Image+Not+Found'" alt="">
+          <img :src="service.image_path != null ? `http://localhost:8000/${service.image_path}` : imageNotFound" alt="Service Image">
           <h6>{{service.name}}</h6>
           <p>Here, we offer ATV Extreme Service where you can explore...</p>
           <!--            <p>{{service.description}}</p>-->
