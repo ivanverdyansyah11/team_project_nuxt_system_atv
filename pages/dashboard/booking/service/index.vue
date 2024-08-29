@@ -1,19 +1,19 @@
 <script setup lang="ts">
-import {useBookingStore} from "~/stores/booking"
+import {useBookingServiceStore} from "~/stores/bookingService"
 import {useCustomerStore} from "~/stores/customer"
 import {useServiceStore} from "~/stores/service"
 import {useField, useForm} from 'vee-validate'
 import {navigateTo} from "nuxt/app"
 import {onMounted} from 'vue'
-import Cookies from "js-cookie"
 import * as yup from 'yup'
+import Cookies from "js-cookie";
 
 definePageMeta({
   title: 'Create Booking Service Page',
   layout: 'dashboard'
 })
 
-const bookingStore = useBookingStore()
+const bookingServiceStore = useBookingServiceStore()
 const customerStore = useCustomerStore()
 const serviceStore = useServiceStore()
 
@@ -92,12 +92,15 @@ const create = handleSubmit(async (values) => {
   delete values.entertainment_service_id
   delete values.qty
   try {
-    await bookingStore.createBookingService(values)
-    if(bookingStore.status_code === 201) {
-      navigateTo('/dashboard/history-booking')
+    await bookingServiceStore.createBookingService(values)
+    if(bookingServiceStore.status_code === 201) {
+      Cookies.set('alert-message', 'Successfully create new booking service')
+      Cookies.set('alert-type', 'true')
+      Cookies.set('alert-page', 'Booking Service')
+      navigateTo('/dashboard/history-booking/service')
     }
   } catch (error) {
-    navigateTo('/dashboard/history-booking')
+    navigateTo('/dashboard/history-booking/service')
   }
 })
 
