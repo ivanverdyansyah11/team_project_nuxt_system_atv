@@ -1,24 +1,25 @@
 <script setup lang="ts">
-import {useBundleStore} from "~/stores/bundle";
+import {useBundleStore} from "~/stores/bundle"
 import {ref, onMounted} from 'vue'
+import imageNotFound from '~/assets/image/other/image-not-found.svg'
 
 definePageMeta({
   layout: 'homepage'
 })
 
-const bundleStore = useBundleStore();
+const bundleStore = useBundleStore()
 const keyword = ref('')
 let packageLength = ref(0)
 
 const search = async (event: any) => {
   event.preventDefault()
   bundleStore.$state.keyword = keyword.value
-  await bundleStore.getAllBundle()
+  await bundleStore.getAllBundleWithoutPagination()
   packageLength.value = bundleStore.bundleAll.length
 }
 
 onMounted(async () => {
-  await bundleStore.getAllBundle();
+  await bundleStore.getAllBundleWithoutPagination()
   packageLength.value = bundleStore.bundleAll.length
 })
 </script>
@@ -28,7 +29,7 @@ onMounted(async () => {
   <section class="hero-small container" id="hero">
     <div class="row justify-content-center">
       <div class="col-lg-9 col-xl-8 text-lg-center">
-        <h1 class="headline">Discover ATRide Adventure Comprehensive ATV Rental Packages</h1>
+        <h1 class="headline">Discover ATRide Adventure Comprehensive Packages</h1>
         <p class="description">Embark on an unforgettable journey with ATRide Adventure's wide array of ATV rental packages. Whether you're seeking thrilling off-road escapades, serene trail rides, or weekend adventures, we offer the perfect package to suit your needs.</p>
         <form>
           <input type="search" class="input-search" placeholder="Search package..." autocomplete="off" v-model="keyword" @keyup="search">
@@ -45,7 +46,7 @@ onMounted(async () => {
       <div v-if="packageLength > 0" class="col" v-for="(bundle, index) in bundleStore.bundleAll" :key="index">
         <NuxtLink :to="{path: `/homepage/package/${bundle.id}`}" class="card-package w-100">
           <div class="package-image">
-            <img :src="bundle.image_path != null ? `http://localhost:8000/${bundle.image_path}` : 'https://placehold.co/600x400?text=Image+Not+Found'" alt="Package Image">
+            <img :src="bundle.image_path != null ? `http://localhost:8000/${bundle.image_path}` : imageNotFound" alt="Package Image">
           </div>
           <h6>{{bundle.name}}</h6>
           <p>{{bundle.description}}</p>
