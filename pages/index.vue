@@ -1,11 +1,10 @@
 <script setup lang="ts">
-
+import { navigateTo } from 'nuxt/app'
+navigateTo('/auth/login')
 </script>
 
 <template>
-<p>Lorem ipsum dolor sit amet.</p>
 </template>
 
 <style scoped>
-
 </style>
