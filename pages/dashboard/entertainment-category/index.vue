@@ -1,8 +1,9 @@
 <script setup lang="ts">
-import { useCategoryStore } from "~/stores/category";
+import {useCategoryStore} from "~/stores/category"
+import {ref, onMounted} from 'vue'
+import {useField, useForm} from 'vee-validate'
+import {getAlert, alertMessage, alertType, alertPage} from "~/helpers/Alert"
 import Cookies from 'js-cookie'
-import { ref, onMounted } from 'vue'
-import { useField, useForm } from 'vee-validate'
 import * as yup from 'yup'
 
 definePageMeta({
@@ -13,20 +14,20 @@ definePageMeta({
 const keyword = ref('')
 const categoryStore = useCategoryStore()
 let categoryLength = ref(0)
-const categoryData = ref(null);
+const categoryData = ref(null)
 const totalPages = ref(0)
-let alertMessage = useCookie('alert-message')
-let alertPage = useCookie('alert-page')
+const dynamicPath = ref('')
+const linkRef = ref<HTMLAnchorElement | null>(null)
 
 const schema = yup.object({
   name: yup.string().required('Name is required'),
-});
+})
 
-const { handleSubmit, resetForm, setValues } = useForm({
+const { handleSubmit, setValues } = useForm({
   validationSchema: schema,
-});
+})
 
-const { value: name, errorMessage: nameError } = useField('name');
+const { value: name, errorMessage: nameError } = useField('name')
 
 const search = async (event: any) => {
   event.preventDefault()
@@ -43,92 +44,107 @@ const changePage = async (page: number) => {
   categoryLength.value = categoryStore.categoryAll.length
 }
 
-const createCategory = handleSubmit( async (values) => {
-  await categoryStore.createCategory(values);
-  if (categoryStore.status_code === 200) {
-    Cookies.set('alert-message', 'Successfully create new category');
-    Cookies.set('alert-page', 'Category');
-    alertMessage = useCookie('alert-message')
-    alertPage = useCookie('alert-page')
-    setValues({
-      name: '',
-    });
-    await categoryStore.getAllCategory()
-    totalPages.value = Math.ceil(categoryStore.totalPages / categoryStore.pageSize)
-    categoryLength.value = categoryStore.categoryAll.length
-  }
-});
+const exportCategory = async () => {
+  const blob = await categoryStore.exportCategory()
+  const url = URL.createObjectURL(blob)
+  dynamicPath.value = url
+}
+
+const removeInputValues = () => {
+  setValues({
+    name: '',
+  })
+}
 
 const removeCategoryDetail = async () => {
   categoryData.value = null
-  setValues({
-    name: '',
-  });
+  removeInputValues()
 }
 
 const categoryDetail = async (categorySelect: any) => {
-  await categoryStore.getCategoryById(categorySelect.id);
+  await categoryStore.getCategoryById(categorySelect.id)
   categoryData.value = categorySelect
-  const category = categoryStore.category;
+  const category = categoryStore.category
   setValues({
     name: category.name,
-  });
+  })
 }
 
-const updateCategory = handleSubmit( async (values) => {
-  await categoryStore.updateCategory(values, categoryData.value.id);
-  if (categoryStore.status_code === 200) {
-    Cookies.set('alert-message', 'Successfully update category');
-    Cookies.set('alert-page', 'Category');
-    alertMessage = useCookie('alert-message')
-    alertPage = useCookie('alert-page')
-    setValues({
-      name: '',
-    });
-    categoryData.value = null;
+const createCategory = handleSubmit( async (values) => {
+  await categoryStore.createCategory(values)
+  if (categoryStore.status_code === 201) {
+    Cookies.set('alert-message', 'Successfully create new entertainment category')
+    Cookies.set('alert-type', 'true')
+    Cookies.set('alert-page', 'Category')
+    getAlert()
+    removeInputValues()
     await categoryStore.getAllCategory()
+    totalPages.value = Math.ceil(categoryStore.totalPages / categoryStore.pageSize)
+    categoryLength.value = categoryStore.categoryAll.length
+  } else {
+    getAlert()
   }
-});
+})
+
+const updateCategory = handleSubmit( async (values) => {
+  await categoryStore.updateCategory(values, categoryData.value.id)
+  if (categoryStore.status_code === 200) {
+    Cookies.set('alert-message', 'Successfully update entertainment category')
+    Cookies.set('alert-type', 'true')
+    Cookies.set('alert-page', 'Category')
+    getAlert()
+    removeInputValues()
+    categoryData.value = null
+    await categoryStore.getAllCategory()
+  } else {
+    getAlert()
+  }
+})
 
 const confirmDeleteCategory = async () => {
   if (categoryData.value) {
-    await categoryStore.deleteCategory(categoryData.value.id);
+    await categoryStore.deleteCategory(categoryData.value.id)
     if (categoryStore.status_code === 200) {
-      Cookies.set('alert-message', 'Successfully deleted category');
-      Cookies.set('alert-page', 'Category');
-      alertMessage = useCookie('alert-message')
-      alertPage = useCookie('alert-page')
+      Cookies.set('alert-message', 'Successfully deleted entertainment category')
+      Cookies.set('alert-type', 'true')
+      Cookies.set('alert-page', 'Category')
+      getAlert()
     }
-    categoryData.value = null;
-    totalPages.value = Math.ceil(categoryStore.totalPages / categoryStore.pageSize)
+    categoryData.value = null
     categoryLength.value = categoryStore.categoryAll.length
+    totalPages.value = Math.ceil(categoryLength.value / categoryStore.pageSize)
+  } else {
+    getAlert()
   }
-};
+}
 
 onMounted(async () => {
   await categoryStore.getAllCategory()
+  await exportCategory()
   categoryLength.value = categoryStore.categoryAll.length
   totalPages.value = Math.ceil(categoryStore.totalPages / categoryStore.pageSize)
 })
 
 onBeforeRouteLeave((to, from, next) => {
-  Cookies.remove('alert-message');
-  Cookies.remove('alert-page');
-  next();
-});
+  Cookies.remove('alert-message')
+  Cookies.remove('alert-type')
+  Cookies.remove('alert-page')
+  next()
+})
 
 onBeforeRouteUpdate((to, from, next) => {
-  Cookies.remove('alert-message');
-  Cookies.remove('alert-page');
-  next();
-});
+  Cookies.remove('alert-message')
+  Cookies.remove('alert-type')
+  Cookies.remove('alert-page')
+  next()
+})
 </script>
 
 <template>
   <div class="content container mt-4">
     <div class="row">
       <div class="col-12">
-        <div v-if="alertPage == 'Category'" class="alert alert-success w-100" role="alert">
+        <div v-if="alertPage == 'Category'" class="alert w-100" :class="alertType != false ? 'alert-success' : 'alert-danger'" role="alert">
           {{ alertMessage }}
         </div>
       </div>
@@ -142,6 +158,7 @@ onBeforeRouteUpdate((to, from, next) => {
             <button type="button" class="button-primary-small d-none d-md-inline-block" data-bs-toggle="modal" data-bs-target="#createModal">Add
               New
               Category</button>
+            <NuxtLink :to="dynamicPath" ref="linkRef" download class="button-reverse">Export Excel</NuxtLink>
           </div>
           <div class="wrapper-table mt-4">
             <table class="table" style="width:100%">
