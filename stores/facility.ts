@@ -1,6 +1,6 @@
-import { defineStore } from 'pinia';
-import { apiUrl } from '~/helpers/Variable';
-import Cookies from "js-cookie";
+import {defineStore} from 'pinia'
+import {apiUrl} from '~/helpers/Variable'
+import Cookies from "js-cookie"
 
 export const useFacilityStore = defineStore('facility', {
     state: () => ({
@@ -16,38 +16,62 @@ export const useFacilityStore = defineStore('facility', {
         async getAllFacilityWithoutPaginate() {
             try {
                 const token = useCookie('auth-token')
-                const response = await $fetch(`${ apiUrl }/facilities`, {
+                const response = await $fetch(`${apiUrl}/facilities`, {
                     method: 'GET',
                     headers: { 'Authorization': `Bearer ${token.value}` },
                 })
-                this.facilityAll = response?.data ? response?.data : []
+                this.facilityAll = response.data
             } catch (error) {
-                console.log(error?.message)
+                this.status_code = error.response.status || error.statusCode || error.code || 'Unknown error'
+                Cookies.set('alert-message', 'Failed to load data facility')
+                Cookies.set('alert-type', 'false')
+                Cookies.set('alert-page', 'Facility')
             }
         },
         async getAllFacility() {
             try {
                 const token = useCookie('auth-token')
-                const response = await $fetch(`${ apiUrl }/facilities?current_page=${this.page}&page_size=${this.pageSize}&search=${this.keyword}`, {
+                const response = await $fetch(`${apiUrl}/facilities?current_page=${this.page}&page_size=${this.pageSize}&search=${this.keyword}`, {
                     method: 'GET',
                     headers: { 'Authorization': `Bearer ${token.value}` },
                 })
-                this.facilityAll = response?.data ? response?.data : []
-                this.totalPages = response?.meta?.total
+                this.facilityAll = response.data
+                this.totalPages = response.meta.total
             } catch (error) {
-                console.log(error?.message)
+                this.status_code = error.response.status || error.statusCode || error.code || 'Unknown error'
+                Cookies.set('alert-message', 'Failed to load data facility')
+                Cookies.set('alert-type', 'false')
+                Cookies.set('alert-page', 'Facility')
             }
         },
         async getFacilityById(facilityId: string) {
             try {
                 const token = useCookie('auth-token')
-                const response = await $fetch(`${ apiUrl }/facilities/${ facilityId }`, {
+                const response = await $fetch(`${apiUrl}/facilities/${ facilityId }`, {
                     method: 'GET',
                     headers: { 'Authorization': `Bearer ${token.value}` },
                 })
-                this.facility = response?.data ? response?.data : {}
+                this.facility = response.data
             } catch (error) {
-                console.log(error?.message)
+                this.status_code = error.response.status || error.statusCode || error.code || 'Unknown error'
+                Cookies.set('alert-message', 'Failed to load data facility')
+                Cookies.set('alert-type', 'false')
+                Cookies.set('alert-page', 'Facility')
+            }
+        },
+        async exportFacility() {
+            try {
+                const token = useCookie('auth-token')
+                const response = await $fetch(`${apiUrl}/facilities/export/excel`, {
+                    method: 'GET',
+                    headers: { 'Authorization': `Bearer ${token.value}` },
+                })
+                return response
+            } catch (error) {
+                this.status_code = error.response.status || error.statusCode || error.code || 'Unknown error'
+                Cookies.set('alert-message', 'Failed to export data facility')
+                Cookies.set('alert-type', 'false')
+                Cookies.set('alert-page', 'Facility')
             }
         },
         async createFacility(createData: any) {
@@ -57,41 +81,47 @@ export const useFacilityStore = defineStore('facility', {
                     method: 'POST',
                     headers: { 'Authorization': `Bearer ${token.value}` },
                     body: createData
-                });
-                this.status_code = response?.data ? 200 : null;
-                this.totalPages = response?.meta?.total
+                })
+                this.status_code = response.meta.code
+                this.totalPages = response.meta.total
             } catch (error) {
-                console.log(error?.message)
+                this.status_code = error.response.status || error.statusCode || error.code || 'Unknown error'
+                Cookies.set('alert-message', 'Failed to create new facility')
+                Cookies.set('alert-type', 'false')
+                Cookies.set('alert-page', 'Facility')
             }
         },
         async updateFacility(updateData: any, facilityId: string) {
             try {
-                console.log(facilityId)
                 const token = useCookie('auth-token')
                 const response = await $fetch(`${apiUrl}/facilities/${facilityId}`, {
                     method: 'PATCH',
                     headers: { 'Authorization': `Bearer ${token.value}` },
                     body: updateData
-                });
-                this.status_code = response?.data ? 200 : null;
+                })
+                this.status_code = response.meta.code
             } catch (error) {
-                console.log(error?.message)
+                this.status_code = error.response.status || error.statusCode || error.code || 'Unknown error'
+                Cookies.set('alert-message', 'Failed to update facility')
+                Cookies.set('alert-type', 'false')
+                Cookies.set('alert-page', 'Facility')
             }
         },
         async deleteFacility(facilityId: number) {
-            try {
-                const token = useCookie('auth-token')
-                const response = await fetch(`${apiUrl}/facilities/${facilityId}`, {
-                    method: 'DELETE',
-                    headers: { 'Authorization': `Bearer ${token.value}` },
-                })
-                this.status_code = response.status;
+            const token = useCookie('auth-token')
+            const response = await fetch(`${apiUrl}/facilities/${facilityId}`, {
+                method: 'DELETE',
+                headers: { 'Authorization': `Bearer ${token.value}` },
+            })
+            this.status_code = response.status
+            if (this.status_code === 200) {
                 this.page = 1
-                this.totalPages = response?.meta?.total
-                await this.getAllFacility();
-            } catch (error) {
-                console.log(error?.message)
+                await this.getAllFacility()
+            } else {
+                Cookies.set('alert-message', 'Failed to delete facility')
+                Cookies.set('alert-type', 'false')
+                Cookies.set('alert-page', 'Facility')
             }
         },
     },
-});
+})
