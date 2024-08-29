@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import {useBookingStore} from "~/stores/booking"
+import {useBookingPackageStore} from "~/stores/bookingPackage"
 import {useCustomerStore} from "~/stores/customer"
 import {useBundleStore} from "~/stores/bundle"
 import {useField, useForm} from 'vee-validate'
@@ -13,7 +13,7 @@ definePageMeta({
   layout: 'dashboard'
 })
 
-const bookingStore = useBookingStore()
+const bookingPackageStore = useBookingPackageStore()
 const customerStore = useCustomerStore()
 const bundleStore = useBundleStore()
 
@@ -83,17 +83,16 @@ const getCustomerData = async (customer_id) => {
 const create = handleSubmit(async (values) => {
   values.date = new Date(values.date).toISOString()
   delete values.qty
-  console.log(values)
   try {
-    await bookingStore.createBookingPackage(values)
-    if(bookingStore.status_code === 201) {
+    await bookingPackageStore.createBookingPackage(values)
+    if(bookingPackageStore.status_code === 201) {
       Cookies.set('alert-message', 'Successfully create new booking package')
       Cookies.set('alert-type', 'true')
-      Cookies.set('alert-page', 'Booking')
-      navigateTo('/dashboard/history-booking')
+      Cookies.set('alert-page', 'Booking Package')
+      navigateTo('/dashboard/history-booking/package')
     }
   } catch (error) {
-    navigateTo('/dashboard/history-booking')
+    navigateTo('/dashboard/history-booking/package')
   }
 })
 
