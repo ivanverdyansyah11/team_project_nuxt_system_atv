@@ -1,19 +1,20 @@
 <script setup lang="ts">
-import { useAuthStore } from "~/stores/auth";
-import { ref, onMounted } from 'vue';
-import { useField, useForm } from 'vee-validate'
+import {useAuthStore} from "~/stores/auth"
+import {ref, onMounted} from 'vue'
+import {useField, useForm} from 'vee-validate'
+import {navigateTo} from "nuxt/app"
+import Cookies from "js-cookie"
 import * as yup from 'yup'
-import Cookies from "js-cookie";
-import { navigateTo } from "nuxt/app";
+import profileNotFound from '~/assets/image/profile/profile-not-found.svg'
 
 definePageMeta({
   title: 'Edit Profile Page',
   layout: 'dashboard'
-});
+})
 
-const authStore = useAuthStore();
-const updateDataImage = ref('https://placehold.co/600x400?text=Image+Not+Found');
-const file = ref<File | null>(null);
+const authStore = useAuthStore()
+const updateDataImage = ref()
+const file = ref<File | null>(null)
 
 const schema = yup.object({
   name: yup.string().required('Name is required'),
@@ -21,26 +22,26 @@ const schema = yup.object({
   email: yup.string().email().required('Email is required'),
   password: yup.string(),
   image: yup.mixed().required('Image is required'),
-});
+})
 
-const { handleSubmit, resetForm, setValues } = useForm({
+const { handleSubmit, setValues } = useForm({
   validationSchema: schema,
-});
+})
 
-const { value: name, errorMessage: nameError } = useField('name');
-const { value: username, errorMessage: usernameError } = useField('username');
-const { value: email, errorMessage: emailError } = useField('email');
-const { value: password, errorMessage: passwordError } = useField('password');
-const { value: image, errorMessage: imageError } = useField('image');
+const { value: name, errorMessage: nameError } = useField('name')
+const { value: username, errorMessage: usernameError } = useField('username')
+const { value: email, errorMessage: emailError } = useField('email')
+const { value: password, errorMessage: passwordError } = useField('password')
+const { value: image, errorMessage: imageError } = useField('image')
 
 const loadProfile = async () => {
   try {
-    await authStore.checkProfile();
-    const profilePath = authStore?.user?.user?.profile_path;
+    await authStore.checkProfile()
+    const profilePath = authStore.user.user.profile_path
     if (profilePath) {
-      updateDataImage.value = `http://localhost:8000/${profilePath}`;
+      updateDataImage.value = `http://localhost:8000/${profilePath}`
     } else {
-      updateDataImage.value = 'https://placehold.co/600x400?text=Image+Not+Found';
+      updateDataImage.value = profileNotFound
     }
     setValues({
       name: authStore.user.name,
@@ -48,52 +49,53 @@ const loadProfile = async () => {
       email: authStore.user.user.email,
       password: '',
       image: updateDataImage.value,
-    });
+    })
   } catch (error) {
-    console.error('Error loading profile:', error);
+    navigateTo('/dashboard/profile')
   }
-};
+}
 
 const previewImage = (e: Event) => {
-  const target = e.target as HTMLInputElement;
+  const target = e.target as HTMLInputElement
   if (target.files && target.files[0]) {
-    file.value = target.files[0];
-    const reader = new FileReader();
+    file.value = target.files[0]
+    const reader = new FileReader()
     reader.onload = () => {
       if (typeof reader.result === "string") {
-        updateDataImage.value = reader.result;
+        updateDataImage.value = reader.result
       }
-      target.value = "";
-    };
-    reader.readAsDataURL(file.value);
+      target.value = ""
+    }
+    reader.readAsDataURL(file.value)
   }
-};
+}
 
 const updateProfile = handleSubmit(async (values) => {
-  const { image, ...valueData } = values;
+  const { image, ...valueData } = values
   try {
-    await authStore.updateProfile(valueData);
+    await authStore.updateProfile(valueData)
     if (authStore.status_code === 200) {
       if (file.value) {
-        const formData = new FormData();
-        formData.append('image', file.value);
-        await authStore.saveImageProfile(formData);
+        const formData = new FormData()
+        formData.append('image', file.value)
+        await authStore.saveImageProfile(formData)
       }
-      await loadProfile();
-      Cookies.set('alert-message', 'Successfully updated profile');
-      Cookies.set('alert-page', 'Profile');
-      navigateTo('/dashboard/profile');
+      await loadProfile()
+      Cookies.set('alert-message', 'Successfully updated profile')
+      Cookies.set('alert-type', 'true')
+      Cookies.set('alert-page', 'Profile')
+      navigateTo('/dashboard/profile')
     } else {
-      console.error('Failed to update profile:', authStore.status_code);
+      navigateTo('/dashboard/profile')
     }
   } catch (error) {
-    console.error('Error updating profile:', error);
+    navigateTo('/dashboard/profile')
   }
-});
+})
 
 onMounted(async () => {
-  await loadProfile();
-});
+  await loadProfile()
+})
 </script>
 
 <template>
@@ -105,7 +107,7 @@ onMounted(async () => {
             <div class="row g-3">
               <div class="col-md-3">
                 <div class="input-group d-flex flex-column w-100 pe-xl-4">
-                  <label for="image">
+                  <label for="image" class="w-100">
                     Profile Image
                     <div class="wrapper d-flex flex-column align-items-end w-100" style="margin-top: 8px;">
                       <img :src="updateDataImage" class="input-image input-image-full" alt="Profile Image" style="border-radius: 4px;"/>
