@@ -79,11 +79,17 @@ const toggleActive = (event: Event) => {
           <NuxtLink to="/dashboard/booking/package" :class="{ active: $route.path.startsWith('/dashboard/booking/package') }">Package</NuxtLink>
         </div>
       </button>
-      <NuxtLink to="/dashboard/history-booking"
-                class="menu-link d-flex align-items-center gap-2" :class="{ active: $route.path.startsWith('/dashboard/history-booking') }">
-        <i class="fa-solid fa-credit-card"></i>
-        History Booking
-      </NuxtLink>
+
+      <button type="button" class="menu-link d-flex flex-column parent-menu" :class="{ active: $route.path.startsWith('/dashboard/history-booking') }" @click="toggleActive($event)">
+        <div class="wrapper d-flex align-items-center gap-2">
+          <i class="fa-solid fa-credit-card"></i>
+          History Booking
+        </div>
+        <div class="child-menu flex-column gap-1">
+          <NuxtLink to="/dashboard/history-booking/service" :class="{ active: $route.path.startsWith('/dashboard/history-booking/service') }">Service</NuxtLink>
+          <NuxtLink to="/dashboard/history-booking/package" :class="{ active: $route.path.startsWith('/dashboard/history-booking/package') }">Package</NuxtLink>
+        </div>
+      </button>
       <form @submit.prevent="logout">
         <button type="submit" class="menu-link d-flex gap-2 align-items-center">
           <i class="fa-solid fa-right-from-bracket"></i>
