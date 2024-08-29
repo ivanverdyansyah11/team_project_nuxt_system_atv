@@ -1,40 +1,59 @@
 <script setup lang="ts">
-import { useAuthStore } from '~/stores/auth'
-import { useField, useForm } from 'vee-validate'
+import {useAuthStore} from '~/stores/auth'
+import {useField, useForm} from 'vee-validate'
+import {navigateTo} from "nuxt/app"
+import {getAlert, alertMessage, alertType, alertPage} from "~/helpers/Alert"
 import * as yup from 'yup'
-import { navigateTo } from "nuxt/app"
-import Cookies from "js-cookie";
+import Cookies from "js-cookie"
 
 definePageMeta({
   title: 'Login Page',
   layout: 'auth',
 })
 
-const authStore = useAuthStore();
+const authStore = useAuthStore()
+
 const schema = yup.object({
   name: yup.string().required('Name is required'),
   username: yup.string().required('Username is required'),
   email: yup.string().email().required('Email is required'),
   password: yup.string().min(6, 'Password must be at least 6 characters').required('Password is required'),
-});
+})
 
-const { handleSubmit, resetForm } = useForm({
+const { handleSubmit } = useForm({
   validationSchema: schema,
-});
+})
 
-const { value: name, errorMessage: nameError } = useField('name');
-const { value: username, errorMessage: usernameError } = useField('username');
-const { value: email, errorMessage: emailError } = useField('email');
-const { value: password, errorMessage: passwordError } = useField('password');
+const { value: name, errorMessage: nameError } = useField('name')
+const { value: username, errorMessage: usernameError } = useField('username')
+const { value: email, errorMessage: emailError } = useField('email')
+const { value: password, errorMessage: passwordError } = useField('password')
 
 const registered = handleSubmit( async (values) => {
-  await authStore.register(values);
+  await authStore.register(values)
   if (authStore.status_code === 200) {
-    Cookies.set('alert-message', 'Successfully register account');
-    Cookies.set('alert-page', 'Register');
-    navigateTo('/dashboard/auth/login')
+    Cookies.set('alert-message', 'Successfully register account')
+    Cookies.set('alert-type', 'true')
+    Cookies.set('alert-page', 'Register')
+    navigateTo('/auth/login')
+  } else {
+    getAlert()
   }
-});
+})
+
+onBeforeRouteLeave((to, from, next) => {
+  Cookies.remove('alert-message')
+  Cookies.remove('alert-type')
+  Cookies.remove('alert-page')
+  next()
+})
+
+onBeforeRouteUpdate((to, from, next) => {
+  Cookies.remove('alert-message')
+  Cookies.remove('alert-type')
+  Cookies.remove('alert-page')
+  next()
+})
 </script>
 
 
@@ -43,13 +62,16 @@ const registered = handleSubmit( async (values) => {
     <div class="col-12">
       <div class="topbar-login d-flex align-items-center justify-content-start">
         <div class="container">
-          <img src="../../../assets/image/brand/brand-logo.svg" alt="Brand Logo" style="height: 72px !important;">
+          <img src="../../assets/image/brand/brand-logo.svg" alt="Brand Logo" style="height: 72px !important;">
         </div>
       </div>
     </div>
     <div class="col-md-6 col-lg-4 col-xxl-3 mt-4">
       <div class="container">
         <div class="card-login d-flex flex-column align-items-center">
+          <div v-if="alertPage == 'Register'" class="alert w-100" :class="alertType != false ? 'alert-success' : 'alert-danger'" role="alert">
+            {{ alertMessage }}
+          </div>
           <h2 class="title w-100">Register 👋🏻</h2>
           <p class="w-100">Register to your account to access all our features and services.</p>
           <form @submit.prevent="registered" class="form d-flex flex-column gap-3 w-100">
@@ -78,7 +100,7 @@ const registered = handleSubmit( async (values) => {
               <p v-if="passwordError" class="invalid-label">{{ passwordError }}</p>
             </div>
             <button type="submit" class="button-primary">Register Account</button>
-            <p class="text-redirect mt-2 text-center">Already have an account yet? <NuxtLink to="/dashboard/auth/login">Login</NuxtLink></p>
+            <p class="text-redirect mt-2 text-center">Already have an account yet? <NuxtLink to="/auth/login">Login</NuxtLink></p>
           </form>
         </div>
       </div>
