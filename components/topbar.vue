@@ -2,7 +2,7 @@
 import { useAuthStore } from '~/stores/auth'
 import { useRoute } from 'vue-router'
 import { ref, watch } from 'vue'
-import profileNotFound from '~/assets/image/profile/profile-not-found.svg' // Import the local image
+import profileNotFound from '~/assets/image/profile/profile-not-found.svg'
 
 const route = useRoute();
 const title = ref('')
