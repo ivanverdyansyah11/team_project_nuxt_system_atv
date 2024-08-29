@@ -1,8 +1,9 @@
 <script setup lang="ts">
-import { useRouteStore } from "~/stores/route";
+import {useRouteStore} from "~/stores/route"
+import {ref, onMounted} from 'vue'
+import {useField, useForm} from 'vee-validate'
+import {getAlert, alertMessage, alertType, alertPage} from "~/helpers/Alert"
 import Cookies from 'js-cookie'
-import { ref, onMounted } from 'vue'
-import { useField, useForm } from 'vee-validate'
 import * as yup from 'yup'
 
 definePageMeta({
@@ -13,22 +14,22 @@ definePageMeta({
 const keyword = ref('')
 const routeStore = useRouteStore()
 let routeLength = ref(0)
-const routeData = ref(null);
+const routeData = ref(null)
 const totalPages = ref(0)
-let alertMessage = useCookie('alert-message')
-let alertPage = useCookie('alert-page')
+const dynamicPath = ref('')
+const linkRef = ref<HTMLAnchorElement | null>(null)
 
 const schema = yup.object({
   name: yup.string().required('Name is required'),
   address: yup.string().required('Address is required'),
-});
+})
 
-const { handleSubmit, resetForm, setValues } = useForm({
+const { handleSubmit, setValues } = useForm({
   validationSchema: schema,
-});
+})
 
-const { value: name, errorMessage: nameError } = useField('name');
-const { value: address, errorMessage: addressError } = useField('address');
+const { value: name, errorMessage: nameError } = useField('name')
+const { value: address, errorMessage: addressError } = useField('address')
 
 const search = async (event: any) => {
   event.preventDefault()
@@ -45,96 +46,109 @@ const changePage = async (page: number) => {
   routeLength.value = routeStore.routeAll.length
 }
 
-const createRoute = handleSubmit( async (values) => {
-  await routeStore.createRoute(values);
-  if (routeStore.status_code === 200) {
-    Cookies.set('alert-message', 'Successfully create new route');
-    Cookies.set('alert-page', 'Route');
-    alertMessage = useCookie('alert-message')
-    alertPage = useCookie('alert-page')
-    setValues({
-      name: '',
-      address: '',
-    });
-    await routeStore.getAllRoute()
-    totalPages.value = Math.ceil(routeStore.totalPages / routeStore.pageSize)
-    routeLength.value = routeStore.routeAll.length
-  }
-});
+const exportRoute = async () => {
+  const blob = await routeStore.exportRoute()
+  const url = URL.createObjectURL(blob)
+  dynamicPath.value = url
+}
 
 const removeRouteDetail = async () => {
   routeData.value = null
+  removeInputValues()
+}
+
+const removeInputValues = () => {
   setValues({
     name: '',
     address: '',
-  });
+  })
 }
 
 const routeDetail = async (routeSelect: any) => {
-  await routeStore.getRouteById(routeSelect.id);
+  await routeStore.getRouteById(routeSelect.id)
   routeData.value = routeSelect
-  const route = routeStore.route;
+  const route = routeStore.route
   setValues({
     name: route.name,
     address: route.address,
-  });
+  })
 }
 
-const updateRoute = handleSubmit( async (values) => {
-  await routeStore.updateRoute(values, routeData.value.id);
-  if (routeStore.status_code === 200) {
-    Cookies.set('alert-message', 'Successfully update route');
-    Cookies.set('alert-page', 'Route');
-    alertMessage = useCookie('alert-message')
-    alertPage = useCookie('alert-page')
-    setValues({
-      name: '',
-      address: '',
-    });
-    routeData.value = null;
+const createRoute = handleSubmit( async (values) => {
+  await routeStore.createRoute(values)
+  if (routeStore.status_code === 201) {
+    Cookies.set('alert-message', 'Successfully create new route')
+    Cookies.set('alert-type', 'true')
+    Cookies.set('alert-page', 'Route')
+    getAlert()
+    removeInputValues()
     await routeStore.getAllRoute()
+    totalPages.value = Math.ceil(routeStore.totalPages / routeStore.pageSize)
+    routeLength.value = routeStore.routeAll.length
+  } else {
+    getAlert()
   }
-});
+})
+
+const updateRoute = handleSubmit( async (values) => {
+  await routeStore.updateRoute(values, routeData.value.id)
+  if (routeStore.status_code === 200) {
+    Cookies.set('alert-message', 'Successfully update route')
+    Cookies.set('alert-type', 'true')
+    Cookies.set('alert-page', 'Route')
+    getAlert()
+    removeInputValues()
+    routeData.value = null
+    await routeStore.getAllRoute()
+  } else {
+    getAlert()
+  }
+})
 
 const confirmDeleteRoute = async () => {
   if (routeData.value) {
-    await routeStore.deleteRoute(routeData.value.id);
+    await routeStore.deleteRoute(routeData.value.id)
     if (routeStore.status_code === 200) {
-      Cookies.set('alert-message', 'Successfully deleted route');
-      Cookies.set('alert-page', 'Route');
-      alertMessage = useCookie('alert-message')
-      alertPage = useCookie('alert-page')
+      Cookies.set('alert-message', 'Successfully deleted route')
+      Cookies.set('alert-type', 'true')
+      Cookies.set('alert-page', 'Route')
+      getAlert()
     }
-    routeData.value = null;
-    totalPages.value = Math.ceil(routeStore.totalPages / routeStore.pageSize)
+    routeData.value = null
     routeLength.value = routeStore.routeAll.length
+    totalPages.value = Math.ceil(routeLength.value / routeStore.pageSize)
+  } else {
+    getAlert()
   }
-};
+}
 
 onMounted(async () => {
   await routeStore.getAllRoute()
+  await exportRoute()
   routeLength.value = routeStore.routeAll.length
   totalPages.value = Math.ceil(routeStore.totalPages / routeStore.pageSize)
 })
 
 onBeforeRouteLeave((to, from, next) => {
-  Cookies.remove('alert-message');
-  Cookies.remove('alert-page');
-  next();
-});
+  Cookies.remove('alert-message')
+  Cookies.remove('alert-type')
+  Cookies.remove('alert-page')
+  next()
+})
 
 onBeforeRouteUpdate((to, from, next) => {
-  Cookies.remove('alert-message');
-  Cookies.remove('alert-page');
-  next();
-});
+  Cookies.remove('alert-message')
+  Cookies.remove('alert-type')
+  Cookies.remove('alert-page')
+  next()
+})
 </script>
 
 <template>
   <div class="content container mt-4">
     <div class="row">
       <div class="col-12">
-        <div v-if="alertPage == 'Route'" class="alert alert-success w-100" role="alert">
+        <div v-if="alertPage == 'Route'" class="alert w-100" :class="alertType != false ? 'alert-success' : 'alert-danger'" role="alert">
           {{ alertMessage }}
         </div>
       </div>
@@ -146,6 +160,7 @@ onBeforeRouteUpdate((to, from, next) => {
                      autocomplete="off" v-model="keyword" @keyup="search">
             </form>
             <button type="button" class="button-primary-small d-none d-md-inline-block" data-bs-toggle="modal" data-bs-target="#createModal">Add New Route</button>
+            <NuxtLink :to="dynamicPath" ref="linkRef" download class="button-reverse">Export Excel</NuxtLink>
           </div>
           <div class="wrapper-table mt-4">
             <table class="table" style="width:100%">
