@@ -246,7 +246,7 @@ onBeforeRouteUpdate((to, from, next) => {
           <form @submit.prevent="createCategory" class="form w-100">
             <div class="modal-header d-flex align-items-center justify-content-between">
               <h1 class="modal-title fs-5" id="createModalLabel">Create New Category</h1>
-              <button type="button" data-bs-dismiss="modal" aria-label="Close">
+              <button type="button" data-bs-dismiss="modal" aria-label="Close" @click="removeCategoryDetail()">
                 <i class="fa-solid fa-xmark"></i>
               </button>
             </div>
@@ -263,7 +263,7 @@ onBeforeRouteUpdate((to, from, next) => {
               </div>
             </div>
             <div class="modal-footer">
-              <button type="button" class="button-reverse" data-bs-dismiss="modal">Cancel Add</button>
+              <button type="button" class="button-reverse" data-bs-dismiss="modal" @click="removeCategoryDetail()">Cancel Add</button>
               <button type="submit" class="button-primary-small" data-bs-dismiss="modal">Add New Category</button>
             </div>
           </form>
