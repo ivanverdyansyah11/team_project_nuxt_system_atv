@@ -83,10 +83,14 @@ const createService = handleSubmit(async (values) => {
       const formData = new FormData()
       formData.append('image', file.value)
       await serviceStore.saveImageService(formData, serviceStore.serviceAll[0].id)
-      Cookies.set('alert-message', 'Successfully create new service')
-      Cookies.set('alert-type', 'true')
-      Cookies.set('alert-page', 'Service')
-      navigateTo('/dashboard/entertainment-service')
+      if (serviceStore.status_code === 200) {
+        Cookies.set('alert-message', 'Successfully create new service')
+        Cookies.set('alert-type', 'true')
+        Cookies.set('alert-page', 'Service')
+        navigateTo('/dashboard/entertainment-service')
+      } else {
+        navigateTo('/dashboard/entertainment-service')
+      }
     } else {
       navigateTo('/dashboard/entertainment-service')
     }
