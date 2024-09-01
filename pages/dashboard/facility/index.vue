@@ -114,6 +114,9 @@ const confirmDeleteFacility = async () => {
     facilityLength.value = facilityStore.facilityAll.length
     totalPages.value = Math.ceil(facilityLength.value / facilityStore.pageSize)
   } else {
+    Cookies.set('alert-message', 'Failed to get data facility')
+    Cookies.set('alert-type', 'false')
+    Cookies.set('alert-page', 'Facility')
     getAlert()
   }
 }
