@@ -123,6 +123,7 @@ onMounted(async () => {
   await exportFacility()
   facilityLength.value = facilityStore.facilityAll.length
   totalPages.value = Math.ceil(facilityStore.totalPages / facilityStore.pageSize)
+  getAlert()
 })
 
 onBeforeRouteLeave((to, from, next) => {
