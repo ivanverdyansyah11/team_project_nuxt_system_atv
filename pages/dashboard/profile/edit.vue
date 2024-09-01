@@ -35,24 +35,20 @@ const { value: password, errorMessage: passwordError } = useField('password')
 const { value: image, errorMessage: imageError } = useField('image')
 
 const loadProfile = async () => {
-  try {
-    await authStore.checkProfile()
-    const profilePath = authStore.user.user.profile_path
-    if (profilePath) {
-      updateDataImage.value = `http://localhost:8000/${profilePath}`
-    } else {
-      updateDataImage.value = profileNotFound
-    }
-    setValues({
-      name: authStore.user.name,
-      username: authStore.user.user.username,
-      email: authStore.user.user.email,
-      password: '',
-      image: updateDataImage.value,
-    })
-  } catch (error) {
-    navigateTo('/dashboard/profile')
+  await authStore.checkProfile()
+  const profilePath = authStore.user.user.profile_path
+  if (profilePath) {
+    updateDataImage.value = `http://localhost:8000/${profilePath}`
+  } else {
+    updateDataImage.value = profileNotFound
   }
+  setValues({
+    name: authStore.user.name,
+    username: authStore.user.user.username,
+    email: authStore.user.user.email,
+    password: '',
+    image: updateDataImage.value,
+  })
 }
 
 const previewImage = (e: Event) => {
@@ -72,23 +68,19 @@ const previewImage = (e: Event) => {
 
 const updateProfile = handleSubmit(async (values) => {
   const { image, ...valueData } = values
-  try {
-    await authStore.updateProfile(valueData)
-    if (authStore.status_code === 200) {
-      if (file.value) {
-        const formData = new FormData()
-        formData.append('image', file.value)
-        await authStore.saveImageProfile(formData)
-      }
-      await loadProfile()
-      Cookies.set('alert-message', 'Successfully updated profile')
-      Cookies.set('alert-type', 'true')
-      Cookies.set('alert-page', 'Profile')
-      navigateTo('/dashboard/profile')
-    } else {
-      navigateTo('/dashboard/profile')
+  await authStore.updateProfile(valueData)
+  if (authStore.status_code === 200) {
+    if (file.value) {
+      const formData = new FormData()
+      formData.append('image', file.value)
+      await authStore.saveImageProfile(formData)
     }
-  } catch (error) {
+    await loadProfile()
+    Cookies.set('alert-message', 'Successfully updated profile')
+    Cookies.set('alert-type', 'true')
+    Cookies.set('alert-page', 'Profile')
+    navigateTo('/dashboard/profile')
+  } else {
     navigateTo('/dashboard/profile')
   }
 })
