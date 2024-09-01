@@ -58,22 +58,18 @@ const previewImage = (e: any) => {
 }
 
 const updateBlog = handleSubmit(async (values) => {
-  try {
-    await blogStore.updateBlog(values, route.params.id)
-    if (file.value) {
-      const formData = new FormData()
-      formData.append('image', file.value)
-      await blogStore.saveImageBlog(formData, blogStore.blog.id)
-    }
-    if (blogStore.status_code == 200) {
-      Cookies.set('alert-message', 'Successfully update blog')
-      Cookies.set('alert-type', 'true')
-      Cookies.set('alert-page', 'Blog')
-      navigateTo('/dashboard/blog')
-    } else {
-      navigateTo('/dashboard/blog')
-    }
-  } catch (error) {
+  await blogStore.updateBlog(values, route.params.id)
+  if (file.value) {
+    const formData = new FormData()
+    formData.append('image', file.value)
+    await blogStore.saveImageBlog(formData, blogStore.blog.id)
+  }
+  if (blogStore.status_code == 200) {
+    Cookies.set('alert-message', 'Successfully update blog')
+    Cookies.set('alert-type', 'true')
+    Cookies.set('alert-page', 'Blog')
+    navigateTo('/dashboard/blog')
+  } else {
     navigateTo('/dashboard/blog')
   }
 })
