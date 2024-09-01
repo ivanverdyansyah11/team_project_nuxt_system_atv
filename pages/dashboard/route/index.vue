@@ -118,6 +118,9 @@ const confirmDeleteRoute = async () => {
     routeLength.value = routeStore.routeAll.length
     totalPages.value = Math.ceil(routeLength.value / routeStore.pageSize)
   } else {
+    Cookies.set('alert-message', 'Failed to get data route')
+    Cookies.set('alert-type', 'false')
+    Cookies.set('alert-page', 'Route')
     getAlert()
   }
 }
