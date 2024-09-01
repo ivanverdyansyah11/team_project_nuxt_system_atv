@@ -87,22 +87,18 @@ const updateBundle = handleSubmit(async (values) => {
     values.services = services.value.map(entertainment_service_id => ({ entertainment_service_id }))
     values.expired_at = new Date(values.expired_at).toISOString()
     const { image, ...valueData } = values
-    try {
-      if (file.value) {
-        const formData = new FormData()
-        formData.append('image', file.value)
-        await bundleStore.saveImageBundle(formData, bundleStore.bundle.id)
-      }
-      await bundleStore.updateBundle(valueData, route.params.id)
-      if (bundleStore.status_code == 200) {
-        Cookies.set('alert-message', 'Successfully update new entertainment package')
-        Cookies.set('alert-type', 'true')
-        Cookies.set('alert-page', 'Package')
-        navigateTo('/dashboard/entertainment-package')
-      } else {
-        navigateTo('/dashboard/entertainment-package')
-      }
-    } catch (error) {
+    await bundleStore.updateBundle(valueData, route.params.id)
+    if (file.value) {
+      const formData = new FormData()
+      formData.append('image', file.value)
+      await bundleStore.saveImageBundle(formData, bundleStore.bundle.id)
+    }
+    if (bundleStore.status_code == 200) {
+      Cookies.set('alert-message', 'Successfully update new entertainment package')
+      Cookies.set('alert-type', 'true')
+      Cookies.set('alert-page', 'Package')
+      navigateTo('/dashboard/entertainment-package')
+    } else {
       navigateTo('/dashboard/entertainment-package')
     }
   } else {
