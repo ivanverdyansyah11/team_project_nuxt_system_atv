@@ -49,6 +49,11 @@ const confirmDeleteBlog = async () => {
     blogDelete.value = null
     blogLength.value = blogStore.blogAll.length
     totalPages.value = Math.ceil(blogLength.value / blogStore.pageSize)
+  } else {
+    Cookies.set('alert-message', 'Failed to get data blog')
+    Cookies.set('alert-type', 'false')
+    Cookies.set('alert-page', 'Blog')
+    getAlert()
   }
 }
 
