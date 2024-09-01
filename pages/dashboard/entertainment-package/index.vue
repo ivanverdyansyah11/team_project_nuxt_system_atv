@@ -54,6 +54,9 @@ const confirmDeletePackage = async () => {
     packageLength.value = bundleStore.bundleAll.length
     totalPages.value = Math.ceil(packageLength.value / bundleStore.pageSize)
   } else {
+    Cookies.set('alert-message', 'Failed to get data entertainment package')
+    Cookies.set('alert-type', 'false')
+    Cookies.set('alert-page', 'Package')
     getAlert()
   }
 }
