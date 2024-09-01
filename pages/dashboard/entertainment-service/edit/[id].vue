@@ -96,22 +96,18 @@ const updateService = handleSubmit(async (values) => {
     values.instructors = instructors.value.map(instructor_id => ({ instructor_id }))
     values.mandatory_luggages = mandatory_luggages.value.map(mandatory_luggage_id => ({ mandatory_luggage_id }))
     const { image, ...valueData } = values
-    try {
-      await serviceStore.updateService(valueData, route.params.id)
-      if (file.value) {
-        const formData = new FormData()
-        formData.append('image', file.value)
-        await serviceStore.saveImageService(formData, serviceStore.service.id)
-      }
-      if(serviceStore.status_code == 200) {
-        Cookies.set('alert-message', 'Successfully update service')
-        Cookies.set('alert-type', 'true')
-        Cookies.set('alert-page', 'Service')
-        navigateTo('/dashboard/entertainment-service')
-      } else {
-        navigateTo('/dashboard/entertainment-service')
-      }
-    } catch (error) {
+    await serviceStore.updateService(valueData, route.params.id)
+    if (file.value) {
+      const formData = new FormData()
+      formData.append('image', file.value)
+      await serviceStore.saveImageService(formData, serviceStore.service.id)
+    }
+    if(serviceStore.status_code == 200) {
+      Cookies.set('alert-message', 'Successfully update service')
+      Cookies.set('alert-type', 'true')
+      Cookies.set('alert-page', 'Service')
+      navigateTo('/dashboard/entertainment-service')
+    } else {
       navigateTo('/dashboard/entertainment-service')
     }
   } else {
