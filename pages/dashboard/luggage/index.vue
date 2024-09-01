@@ -122,6 +122,7 @@ onMounted(async () => {
   await exportLuggage()
   luggageLength.value = luggageStore.luggageAll.length
   totalPages.value = Math.ceil(luggageStore.totalPages / luggageStore.pageSize)
+  getAlert()
 })
 
 onBeforeRouteLeave((to, from, next) => {
