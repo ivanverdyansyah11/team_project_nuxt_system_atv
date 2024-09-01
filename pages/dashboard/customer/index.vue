@@ -84,6 +84,7 @@ onMounted(async () => {
   await exportCustomer()
   customerLength.value = customerStore.customerAll.length
   totalPages.value = Math.ceil(customerStore.totalPages / customerStore.pageSize)
+  getAlert()
 })
 
 onBeforeRouteLeave((to, from, next) => {
