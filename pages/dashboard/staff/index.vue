@@ -134,6 +134,9 @@ const confirmDeleteStaff = async () => {
     staffLength.value = staffStore.staffAll.length
     totalPages.value = Math.ceil(staffLength.value / staffStore.pageSize)
   } else {
+    Cookies.set('alert-message', 'Failed to get data staff')
+    Cookies.set('alert-type', 'false')
+    Cookies.set('alert-page', 'Staff')
     getAlert()
   }
 }
