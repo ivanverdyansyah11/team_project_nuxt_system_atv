@@ -60,10 +60,14 @@ const createBundle = handleSubmit(async (values) => {
       const formData = new FormData()
       formData.append('image', file.value)
       await bundleStore.saveImageBundle(formData, bundleStore.bundle.id)
-      Cookies.set('alert-message', 'Successfully create new entertainment package')
-      Cookies.set('alert-type', 'true')
-      Cookies.set('alert-page', 'Package')
-      navigateTo('/dashboard/entertainment-package')
+      if (bundleStore.status_code === 200) {
+        Cookies.set('alert-message', 'Successfully create new entertainment package')
+        Cookies.set('alert-type', 'true')
+        Cookies.set('alert-page', 'Package')
+        navigateTo('/dashboard/entertainment-package')
+      } else {
+        navigateTo('/dashboard/entertainment-package')
+      }
     } else {
       navigateTo('/dashboard/entertainment-package')
     }
