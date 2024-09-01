@@ -143,6 +143,7 @@ onMounted(async () => {
   await exportStaff()
   staffLength.value = staffStore.staffAll.length
   totalPages.value = Math.ceil(staffStore.totalPages / staffStore.pageSize)
+  getAlert()
 })
 
 onBeforeRouteLeave((to, from, next) => {
