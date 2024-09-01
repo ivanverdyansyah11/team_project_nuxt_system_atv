@@ -103,7 +103,7 @@ const updateService = handleSubmit(async (values) => {
       await serviceStore.saveImageService(formData, serviceStore.service.id)
     }
     if(serviceStore.status_code == 200) {
-      Cookies.set('alert-message', 'Successfully update service')
+      Cookies.set('alert-message', 'Successfully update entertainment service')
       Cookies.set('alert-type', 'true')
       Cookies.set('alert-page', 'Service')
       navigateTo('/dashboard/entertainment-service')
