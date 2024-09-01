@@ -44,7 +44,7 @@ const confirmDeleteService = async () => {
   if (serviceDelete.value) {
     await serviceStore.deleteService(serviceDelete.value.id)
     if (serviceStore.status_code === 200) {
-      Cookies.set('alert-message', 'Successfully deleted service')
+      Cookies.set('alert-message', 'Successfully deleted entertainment service')
       Cookies.set('alert-type', 'true')
       Cookies.set('alert-page', 'Service')
       getAlert()
@@ -53,6 +53,9 @@ const confirmDeleteService = async () => {
     serviceLength.value = serviceStore.serviceAll.length
     totalPages.value = Math.ceil(serviceLength.value / serviceStore.pageSize)
   } else {
+    Cookies.set('alert-message', 'Failed to get data entertainment service')
+    Cookies.set('alert-type', 'false')
+    Cookies.set('alert-page', 'Service')
     getAlert()
   }
 }
