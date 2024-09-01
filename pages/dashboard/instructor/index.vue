@@ -143,6 +143,7 @@ onMounted(async () => {
   await exportInstructor()
   instructorLength.value = instructorStore.instructorAll.length
   totalPages.value = Math.ceil(instructorStore.totalPages / instructorStore.pageSize)
+  getAlert()
 })
 
 onBeforeRouteLeave((to, from, next) => {
