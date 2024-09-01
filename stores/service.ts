@@ -116,6 +116,7 @@ export const useServiceStore = defineStore('service', {
                     body: updateData
                 })
                 this.status_code = response.meta.code
+                this.service = response.data
             } catch (error) {
                 this.status_code = error.response.status || error.statusCode || error.code || 'Unknown error'
                 Cookies.set('alert-message', 'Failed to update entertainment service')
