@@ -45,13 +45,12 @@ const previewImage = (e: any) => {
 }
 
 const createBlog = handleSubmit(async (values) => {
-  try {
-    await blogStore.createBlog(values)
-    if (blogStore.status_code === 201 && file.value) {
-      await blogStore.getAllBlogWithoutPagination()
-      const formData = new FormData()
-      formData.append('image', file.value)
-      await blogStore.saveImageBlog(formData, blogStore.blogAll[0].id)
+  await blogStore.createBlog(values)
+  if (blogStore.status_code === 201 && file.value) {
+    const formData = new FormData()
+    formData.append('image', file.value)
+    await blogStore.saveImageBlog(formData, blogStore.blog.id)
+    if (blogStore.status_code === 200) {
       Cookies.set('alert-message', 'Successfully create new blog')
       Cookies.set('alert-type', 'true')
       Cookies.set('alert-page', 'Blog')
@@ -59,7 +58,7 @@ const createBlog = handleSubmit(async (values) => {
     } else {
       navigateTo('/dashboard/blog')
     }
-  } catch (error) {
+  } else {
     navigateTo('/dashboard/blog')
   }
 })
