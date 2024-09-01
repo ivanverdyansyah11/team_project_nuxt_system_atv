@@ -127,6 +127,7 @@ onMounted(async () => {
   await exportRoute()
   routeLength.value = routeStore.routeAll.length
   totalPages.value = Math.ceil(routeStore.totalPages / routeStore.pageSize)
+  getAlert()
 })
 
 onBeforeRouteLeave((to, from, next) => {
