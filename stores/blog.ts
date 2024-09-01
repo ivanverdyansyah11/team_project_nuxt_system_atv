@@ -100,6 +100,7 @@ export const useBlogStore = defineStore('blog', {
                 })
                 this.status_code = response.meta.code
                 this.totalPages = response.meta.total
+                this.blog = response.data
             } catch (error) {
                 this.status_code = error.response.status || error.statusCode || error.code || 'Unknown error'
                 Cookies.set('alert-message', 'Failed to create new blog')
@@ -132,6 +133,7 @@ export const useBlogStore = defineStore('blog', {
                     body: updateData
                 })
                 this.status_code = response.meta.code
+                this.blog = response.data
             } catch (error) {
                 this.status_code = error.response.status || error.statusCode || error.code || 'Unknown error'
                 Cookies.set('alert-message', 'Failed to update blog')
