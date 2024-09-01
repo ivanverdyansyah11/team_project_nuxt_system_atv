@@ -84,7 +84,7 @@ const createService = handleSubmit(async (values) => {
       formData.append('image', file.value)
       await serviceStore.saveImageService(formData, serviceStore.serviceAll[0].id)
       if (serviceStore.status_code === 200) {
-        Cookies.set('alert-message', 'Successfully create new service')
+        Cookies.set('alert-message', 'Successfully create new entertainment service')
         Cookies.set('alert-type', 'true')
         Cookies.set('alert-page', 'Service')
         navigateTo('/dashboard/entertainment-service')
