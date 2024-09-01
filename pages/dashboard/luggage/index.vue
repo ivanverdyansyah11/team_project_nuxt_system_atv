@@ -106,6 +106,7 @@ const confirmDeleteLuggage = async () => {
     await luggageStore.deleteLuggage(luggageData.value.id)
     if (luggageStore.status_code === 200) {
       Cookies.set('alert-message', 'Successfully deleted luggage')
+      Cookies.set('alert-type', 'true')
       Cookies.set('alert-page', 'Luggage')
       getAlert()
     }
@@ -113,6 +114,9 @@ const confirmDeleteLuggage = async () => {
     luggageLength.value = luggageStore.luggageAll.length
     totalPages.value = Math.ceil(luggageLength.value / luggageStore.pageSize)
   } else {
+    Cookies.set('alert-message', 'Failed to get data luggage')
+    Cookies.set('alert-type', 'false')
+    Cookies.set('alert-page', 'Luggage')
     getAlert()
   }
 }
