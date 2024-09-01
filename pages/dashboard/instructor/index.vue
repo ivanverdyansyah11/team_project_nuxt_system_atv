@@ -134,6 +134,9 @@ const confirmDeleteInstructor = async () => {
     instructorLength.value = instructorStore.instructorAll.length
     totalPages.value = Math.ceil(instructorLength.value / instructorStore.pageSize)
   } else {
+    Cookies.set('alert-message', 'Failed to get data instructor')
+    Cookies.set('alert-type', 'false')
+    Cookies.set('alert-page', 'Instructor')
     getAlert()
   }
 }
