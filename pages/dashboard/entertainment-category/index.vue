@@ -114,6 +114,9 @@ const confirmDeleteCategory = async () => {
     categoryLength.value = categoryStore.categoryAll.length
     totalPages.value = Math.ceil(categoryLength.value / categoryStore.pageSize)
   } else {
+    Cookies.set('alert-message', 'Failed to get data entertainment category')
+    Cookies.set('alert-type', 'false')
+    Cookies.set('alert-page', 'Category')
     getAlert()
   }
 }
