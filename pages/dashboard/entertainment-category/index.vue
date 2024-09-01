@@ -123,6 +123,7 @@ onMounted(async () => {
   await exportCategory()
   categoryLength.value = categoryStore.categoryAll.length
   totalPages.value = Math.ceil(categoryStore.totalPages / categoryStore.pageSize)
+  getAlert()
 })
 
 onBeforeRouteLeave((to, from, next) => {
