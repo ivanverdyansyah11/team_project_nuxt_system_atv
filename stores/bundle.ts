@@ -133,6 +133,7 @@ export const useBundleStore = defineStore('bundle', {
                     body: updateData
                 })
                 this.status_code = response.meta.code
+                this.bundle = response.data
             } catch (error) {
                 this.status_code = error.response.status || error.statusCode || error.code || 'Unknown error'
                 Cookies.set('alert-message', 'Failed to update entertainment package')
