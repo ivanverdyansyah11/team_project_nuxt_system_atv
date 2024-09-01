@@ -14,18 +14,12 @@ const authStore = useAuthStore()
 const updateDataImage = ref()
 
 const loadProfile = async () => {
-  try {
-    await authStore.checkProfile();
-    const profilePath = authStore.user.user.profile_path;
-    if (profilePath) {
-      updateDataImage.value = `http://localhost:8000/${profilePath}`;
-    } else {
-      updateDataImage.value = profileNotFound;
-    }
-  } catch (error) {
-    Cookies.set('alert-message', 'Failed to load profile')
-    Cookies.set('alert-type', 'false')
-    Cookies.set('alert-page', 'Profile')
+  await authStore.checkProfile();
+  const profilePath = authStore.user.user.profile_path;
+  if (profilePath) {
+    updateDataImage.value = `http://localhost:8000/${profilePath}`;
+  } else {
+    updateDataImage.value = profileNotFound;
   }
 }
 
@@ -34,16 +28,18 @@ onMounted(async () => {
   getAlert()
 })
 
-onBeforeRouteLeave(() => {
+onBeforeRouteLeave((to, from, next) => {
   Cookies.remove('alert-message')
   Cookies.remove('alert-type')
   Cookies.remove('alert-page')
+  next()
 })
 
-onBeforeRouteUpdate(() => {
+onBeforeRouteUpdate((to, from, next) => {
   Cookies.remove('alert-message')
   Cookies.remove('alert-type')
   Cookies.remove('alert-page')
+  next()
 })
 </script>
 
